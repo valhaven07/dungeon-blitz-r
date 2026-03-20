@@ -469,69 +469,10 @@ export class WorldEnter {
             }
             bb.writeMethod11(0, 1);
 
-            const missionsState = WorldEnter.asRecord(character.missions);
-            const totalMissions = MissionLoader.getTotalMissions();
-            bb.writeMethod4(totalMissions);
-            for (let missionId = 1; missionId <= totalMissions; missionId++) {
-                const missionDef = MissionLoader.getMissionDef(missionId);
-                const missionState = WorldEnter.asRecord(missionsState[missionId.toString()]);
-                const state = Number(missionState.state ?? 0);
+            bb.writeMethod4(0);
 
-                if (missionDef?.Tier) {
-                    bb.writeMethod11(state >= 3 ? 1 : 0, 1);
-                    continue;
-                }
-
-                const hasEntry = state !== 0;
-                bb.writeMethod11(hasEntry ? 1 : 0, 1);
-                if (!hasEntry) {
-                    continue;
-                }
-
-                const isReady = state >= 2;
-                bb.writeMethod11(isReady ? 1 : 0, 1);
-                if (!isReady) {
-                    if ((missionDef?.highscore ?? 0) > 1) {
-                        bb.writeMethod4(Number(missionState.currCount ?? 0));
-                    }
-                    continue;
-                }
-
-                bb.writeMethod11(state >= 3 ? 1 : 0, 1);
-                if (WorldEnter.missionHasDungeonProgress(missionDef)) {
-                    bb.writeMethod11(Number(missionState.Tier ?? 0), 4);
-                    bb.writeMethod4(Number(missionState.highscore ?? 0));
-                    bb.writeMethod4(Number(missionState.Time ?? 0));
-                }
-            }
-
-            const friends = normalizeFriendEntries(character.friends);
-            bb.writeMethod4(friends.length);
-            for (const friend of friends) {
-                const friendName = String(friend.name ?? '');
-                const isRequest = Boolean(friend.isRequest);
-                let isOnline = false;
-                let className = '';
-                let level = 1;
-
-                for (const session of GlobalState.sessionsByToken.values()) {
-                    if (session.character?.name === friendName) {
-                        isOnline = true;
-                        className = String(session.character.class ?? '');
-                        level = Number(session.character.level ?? 1);
-                        break;
-                    }
-                }
-
-                bb.writeMethod13(friendName);
-                bb.writeMethod11(isRequest ? 1 : 0, 1);
-                bb.writeMethod11(isOnline ? 1 : 0, 1);
-                if (isOnline) {
-                    bb.writeMethod11(0, 1);
-                    bb.writeMethod11(WorldEnter.getClassId(className), 2);
-                    bb.writeMethod11(level, 6);
-                }
-            }
+            // Keep welcome payload stable; the authoritative friend state is sent via social packets.
+            bb.writeMethod4(0);
 
             const learnedAbilities = WorldEnter.asArray(character.learnedAbilities);
             bb.writeMethod6(learnedAbilities.length, 7);

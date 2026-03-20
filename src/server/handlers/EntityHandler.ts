@@ -369,6 +369,90 @@ export class EntityHandler {
         return null;
     }
 
+    private static getStartedRoomIdsForLevel(
+        client: Pick<Client, 'startedRoomEvents'> | null | undefined,
+        levelName: string | null | undefined
+    ): number[] {
+        const normalizedLevel = LevelConfig.normalizeLevelName(levelName);
+        if (!normalizedLevel || !client?.startedRoomEvents) {
+            return [];
+        }
+
+        const prefix = `${normalizedLevel}:`;
+        const roomIds = new Set<number>();
+        for (const key of client.startedRoomEvents) {
+            if (!key.startsWith(prefix)) {
+                continue;
+            }
+
+            const roomId = Number(key.substring(prefix.length));
+            if (Number.isFinite(roomId) && roomId >= 0) {
+                roomIds.add(Math.round(roomId));
+            }
+        }
+
+        return Array.from(roomIds).sort((left, right) => left - right);
+    }
+
+    private static sendRoomEventStartPacket(client: Client, roomId: number): void {
+        const bb = new BitBuffer(false);
+        bb.writeMethod9(roomId);
+        bb.writeMethod15(true);
+        client.sendBitBuffer(0xA5, bb);
+    }
+
+    private static replayStartedDungeonRoomEventsToJoiner(joiner: Client): void {
+        const levelName = LevelConfig.normalizeLevelName(joiner.currentLevel);
+        if (!levelName || !LevelConfig.isDungeonLevel(levelName) || !joiner.playerSpawned) {
+            return;
+        }
+
+        let anchor: Client | null = null;
+        let anchorStartedRoomIds: number[] = [];
+
+        for (const other of GlobalState.sessionsByToken.values()) {
+            if (other === joiner) {
+                continue;
+            }
+            if (!other.playerSpawned || !areClientsInSameLevelScope(joiner, other) || !areClientsInSameParty(joiner, other)) {
+                continue;
+            }
+
+            const startedRoomIds = EntityHandler.getStartedRoomIdsForLevel(other, levelName);
+            if (startedRoomIds.length === 0) {
+                continue;
+            }
+
+            if (
+                !anchor ||
+                startedRoomIds.length > anchorStartedRoomIds.length ||
+                (startedRoomIds.length === anchorStartedRoomIds.length && Number(other.syncAnchorStartedAt ?? 0) > Number(anchor.syncAnchorStartedAt ?? 0))
+            ) {
+                anchor = other;
+                anchorStartedRoomIds = startedRoomIds;
+            }
+        }
+
+        if (!anchor || anchorStartedRoomIds.length === 0) {
+            return;
+        }
+
+        const anchorRoomId = Number(anchor.currentRoomId ?? -1);
+        if (Number.isFinite(anchorRoomId) && anchorRoomId >= 0) {
+            joiner.currentRoomId = anchorRoomId;
+        }
+
+        for (const roomId of anchorStartedRoomIds) {
+            const key = `${levelName}:${roomId}`;
+            if (joiner.startedRoomEvents.has(key)) {
+                continue;
+            }
+
+            EntityHandler.sendRoomEventStartPacket(joiner, roomId);
+            joiner.startedRoomEvents.add(key);
+        }
+    }
+
     static resolveCanonicalEntity(levelName: string, entityId: number): EntityProps | null {
         if (!levelName || entityId <= 0) {
             return null;
@@ -1128,6 +1212,7 @@ export class EntityHandler {
             EntityHandler.sendOtherPlayerMountToJoiner(joiner, other);
         }
 
+        EntityHandler.replayStartedDungeonRoomEventsToJoiner(joiner);
         EntityHandler.scheduleExistingVisibleClientSpawnEntitiesToJoiner(joiner);
     }
 

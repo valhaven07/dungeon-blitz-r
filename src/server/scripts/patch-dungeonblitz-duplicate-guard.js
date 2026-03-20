@@ -118,7 +118,13 @@ function replaceExact(source, needle, replacement, label) {
 function patchLinkUpdater(source) {
     if (
         source.includes('DUPLICATE_REMOTE_ENTITY_POSITION_TOLERANCE') &&
-        source.includes('_loc46_.cue.bSpawned = true;')
+        source.includes('private function method_1830(') &&
+        source.includes('_loc46_.cue.bSpawned = true;') &&
+        source.includes('this.method_1830(_loc3_,_loc5_,_loc6_)') &&
+        source.includes('if(!_loc3_ || !_loc3_.var_38)') &&
+        source.includes('_loc73_ && (!_loc73_.var_38 || !_loc73_.gfx || !_loc73_.gfx.m_TheDO)') &&
+        !source.includes('if(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER))') &&
+        !source.includes('if(!(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER)))')
     ) {
         return source;
     }
@@ -169,7 +175,7 @@ function patchLinkUpdater(source) {
                 '            {',
                 '               continue;',
                 '            }',
-                '            if(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER))',
+                '            if(Boolean(_loc8_.var_20 & Entity.PLAYER))',
                 '            {',
                 '               continue;',
                 '            }',
@@ -209,6 +215,99 @@ function patchLinkUpdater(source) {
         );
     }
 
+    if (!source.includes('private function method_1830(')) {
+        source = replaceExact(
+            source,
+            join([
+                '      private function method_1615(param1:Packet) : void'
+            ]),
+            join([
+                '      private function method_1830(param1:String, param2:int, param3:int) : a_Cue',
+                '      {',
+                '         var _loc4_:Room = null;',
+                '         var _loc5_:a_Cue = null;',
+                '         var _loc6_:a_Cue = null;',
+                '         var _loc7_:EntType = null;',
+                '         var _loc8_:Point = null;',
+                '         var _loc9_:Number = NaN;',
+                '         var _loc10_:Number = Number.MAX_VALUE;',
+                '         if(!this.var_1 || !this.var_1.level || !this.var_1.level.var_299)',
+                '         {',
+                '            return null;',
+                '         }',
+                '         for each(_loc4_ in this.var_1.level.var_299)',
+                '         {',
+                '            if(!_loc4_ || !_loc4_.var_460)',
+                '            {',
+                '               continue;',
+                '            }',
+                '            for each(_loc5_ in _loc4_.var_460)',
+                '            {',
+                '               if(!_loc5_ || _loc5_.bSpawned)',
+                '               {',
+                '                  continue;',
+                '               }',
+                '               _loc7_ = _loc5_.entType ? EntType.method_48(_loc5_.entType) : null;',
+                '               if(!_loc7_ || _loc7_.entName != param1)',
+                '               {',
+                '                  continue;',
+                '               }',
+                '               _loc8_ = _loc5_.groupSnapPos ? _loc5_.groupSnapPos : this.var_1.method_234(_loc5_);',
+                '               if(!_loc8_)',
+                '               {',
+                '                  continue;',
+                '               }',
+                '               _loc9_ = Math.abs(_loc8_.x - param2) + Math.abs(_loc8_.y - param3);',
+                '               if(_loc9_ < _loc10_)',
+                '               {',
+                '                  _loc10_ = _loc9_;',
+                '                  _loc6_ = _loc5_;',
+                '               }',
+                '            }',
+                '         }',
+                '         return _loc10_ <= DUPLICATE_REMOTE_ENTITY_POSITION_TOLERANCE * 4 ? _loc6_ : null;',
+                '      }',
+                '      ',
+                '      private function method_1615(param1:Packet) : void'
+            ]),
+            'LinkUpdater cue resolver insertion'
+        );
+    }
+
+    if (source.includes('if(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER))')) {
+        source = replaceExact(
+            source,
+            join([
+                '            if(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER))',
+                '            {',
+                '               continue;',
+                '            }'
+            ]),
+            join([
+                '            if(Boolean(_loc8_.var_20 & Entity.PLAYER))',
+                '            {',
+                '               continue;',
+                '            }'
+            ]),
+            'LinkUpdater broaden duplicate matcher to local entities'
+        );
+    }
+
+    if (source.includes('if(!(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER)))')) {
+        source = replaceExact(
+            source,
+            join([
+                '               if(!(!(_loc8_.var_20 & Entity.REMOTE) || Boolean(_loc8_.var_20 & Entity.PLAYER)))',
+                '               {'
+            ]),
+            join([
+                '               if(!(Boolean(_loc8_.var_20 & Entity.PLAYER)))',
+                '               {'
+            ]),
+            'LinkUpdater broaden duplicate matcher to local entities (decompiled form)'
+        );
+    }
+
     if (!source.includes('var _loc74_:Boolean = false;')) {
         source = replaceExact(
             source,
@@ -225,6 +324,50 @@ function patchLinkUpdater(source) {
                 '         _loc2_ = param1.method_4();'
             ]),
             'LinkUpdater local variable insertion'
+        );
+    }
+
+    if (!source.includes('_loc73_ && (!_loc73_.var_38 || !_loc73_.gfx || !_loc73_.gfx.m_TheDO)')) {
+        source = replaceExact(
+            source,
+            join([
+                '         if(_loc73_)',
+                '         {',
+                '            _loc46_ = _loc73_;'
+            ]),
+            join([
+                '         if(_loc73_ && (!_loc73_.var_38 || !_loc73_.gfx || !_loc73_.gfx.m_TheDO))',
+                '         {',
+                '            _loc73_ = null;',
+                '         }',
+                '         if(_loc73_)',
+                '         {',
+                '            _loc46_ = _loc73_;'
+            ]),
+            'LinkUpdater adoption candidate state guard'
+        );
+    }
+
+    if (!source.includes('if(!_loc46_.cue)') || !source.includes('this.method_1830(_loc3_,_loc5_,_loc6_)')) {
+        source = replaceExact(
+            source,
+            join([
+                '         if(_loc46_.cue)',
+                '         {',
+                '            _loc46_.cue.bSpawned = true;',
+                '         }'
+            ]),
+            join([
+                '         if(!_loc46_.cue)',
+                '         {',
+                '            _loc46_.cue = this.method_1830(_loc3_,_loc5_,_loc6_);',
+                '         }',
+                '         if(_loc46_.cue)',
+                '         {',
+                '            _loc46_.cue.bSpawned = true;',
+                '         }'
+            ]),
+            'LinkUpdater cue resolver usage'
         );
     }
 
@@ -282,6 +425,29 @@ function patchLinkUpdater(source) {
                 '         _loc46_.var_38.var_914 = _loc5_;'
             ]),
             'LinkUpdater cue spawn guard'
+        );
+    }
+
+    if (!source.includes('if(!_loc3_ || !_loc3_.var_38)')) {
+        source = replaceExact(
+            source,
+            join([
+                '         _loc2_ = param1.method_4();',
+                '         _loc3_ = this.var_1.GetEntFromID(_loc2_);',
+                '         if(!_loc3_)',
+                '         {',
+                '            return;',
+                '         }'
+            ]),
+            join([
+                '         _loc2_ = param1.method_4();',
+                '         _loc3_ = this.var_1.GetEntFromID(_loc2_);',
+                '         if(!_loc3_ || !_loc3_.var_38)',
+                '         {',
+                '            return;',
+                '         }'
+            ]),
+            'LinkUpdater incremental null guard'
         );
     }
 
@@ -347,6 +513,100 @@ function patchLinkUpdater(source) {
     return source;
 }
 
+function patchRoom(source) {
+    const eol = source.includes('\r\n') ? '\r\n' : '\n';
+    const join = (lines) => lines.join(eol);
+
+    if (source.includes('null.bDisabled = param3 != "On";')) {
+        source = replaceExact(
+            source,
+            join([
+                '            var _loc4_:Door = this.var_1.level.method_1462(param2);',
+                '            if(_loc4_)',
+                '            {',
+                '               null.bDisabled = param3 != "On";',
+                '            }'
+            ]),
+            join([
+                '            var _loc4_:Door = this.var_1.level.method_1462(param2);',
+                '            if(_loc4_)',
+                '            {',
+                '               _loc4_.bDisabled = param3 != "On";',
+                '            }'
+            ]),
+            'Room decompile fix: door state'
+        );
+    }
+
+    if (source.includes('if((Boolean(_loc5_)) && null.entState != Entity.const_6)')) {
+        source = replaceExact(
+            source,
+            join([
+                '            var _loc5_:Entity = this.var_1.GetEntFromID(int(param2));',
+                '            if((Boolean(_loc5_)) && null.entState != Entity.const_6)',
+                '            {',
+                '               null.gfx.m_Seq.method_34(Seq.C_USEPOWER,param3,true);',
+                '            }'
+            ]),
+            join([
+                '            var _loc5_:Entity = this.var_1.GetEntFromID(int(param2));',
+                '            if((Boolean(_loc5_)) && _loc5_.entState != Entity.const_6)',
+                '            {',
+                '               _loc5_.gfx.m_Seq.method_34(Seq.C_USEPOWER,param3,true);',
+                '            }'
+            ]),
+            'Room decompile fix: entity animation'
+        );
+    }
+
+    if (source.includes('var _loc34_:SuperAnimInstance = this.method_67(null);')) {
+        source = replaceExact(
+            source,
+            join([
+                '               var _loc33_:String = "am_WaveFG" + (_loc10_ == 1 ? 14 : _loc10_ - 1);',
+                '               var _loc34_:SuperAnimInstance = this.method_67(null);',
+                '               _loc17_.x = null.m_TheDO.x + 200 + Math.random() * 200;'
+            ]),
+            join([
+                '               var _loc33_:String = "am_WaveFG" + (_loc10_ == 1 ? 14 : _loc10_ - 1);',
+                '               var _loc34_:SuperAnimInstance = this.method_67(_loc33_);',
+                '               _loc17_.x = _loc34_.m_TheDO.x + 200 + Math.random() * 200;'
+            ]),
+            'Room decompile fix: wave animation anchor'
+        );
+    }
+
+    if (source.includes('this.bInstanced && this.var_1.groupmates && this.var_1.groupmates.length && !this.var_1.bAmGroupLeader')) {
+        return source;
+    }
+
+    return replaceExact(
+        source,
+        join([
+            '         if(!_loc3_ || !_loc3_.entName.indexOf("EmberBush"))',
+            '         {',
+            '            return null;',
+            '         }',
+            '         if(param1.bRareSpawn)'
+        ]),
+        join([
+            '         if(!_loc3_ || !_loc3_.entName.indexOf("EmberBush"))',
+            '         {',
+            '            return null;',
+            '         }',
+            '         if(this.bInstanced && this.var_1.groupmates && this.var_1.groupmates.length && !this.var_1.bAmGroupLeader)',
+            '         {',
+            '            if(param1.team != "friend")',
+            '            {',
+            '               return null;',
+            '            }',
+            '         }',
+            '         if(param1.bRareSpawn)'
+        ]),
+        'Room joiner cue spawn guard'
+    );
+}
+
 function main() {
     const repoRoot = resolveRepoRoot();
     const args = parseArgs(process.argv);
@@ -375,17 +635,25 @@ function main() {
 
     fs.rmSync(workRoot, { recursive: true, force: true });
     fs.mkdirSync(workRoot, { recursive: true });
-    runFfdec(ffdecPath, ['-selectclass', 'LinkUpdater', '-export', 'script', workRoot, swfPath]);
+    runFfdec(ffdecPath, ['-selectclass', 'LinkUpdater,Room', '-export', 'script', workRoot, swfPath]);
 
     const linkUpdaterPath = path.join(scriptsRoot, 'LinkUpdater.as');
-    if (!fs.existsSync(linkUpdaterPath)) {
-        throw new Error(`FFDec export did not produce ${linkUpdaterPath}`);
+    const roomPath = path.join(scriptsRoot, 'Room.as');
+    if (!fs.existsSync(linkUpdaterPath) || !fs.existsSync(roomPath)) {
+        throw new Error(`FFDec export did not produce expected scripts in ${scriptsRoot}`);
     }
 
-    const original = fs.readFileSync(linkUpdaterPath, 'utf8');
-    const patched = patchLinkUpdater(original);
-    if (patched !== original) {
-        fs.writeFileSync(linkUpdaterPath, patched, 'utf8');
+    const originalLinkUpdater = fs.readFileSync(linkUpdaterPath, 'utf8');
+    const originalRoom = fs.readFileSync(roomPath, 'utf8');
+    const patchedLinkUpdater = patchLinkUpdater(originalLinkUpdater);
+    const patchedRoom = patchRoom(originalRoom);
+    if (patchedLinkUpdater !== originalLinkUpdater || patchedRoom !== originalRoom) {
+        if (patchedLinkUpdater !== originalLinkUpdater) {
+            fs.writeFileSync(linkUpdaterPath, patchedLinkUpdater, 'utf8');
+        }
+        if (patchedRoom !== originalRoom) {
+            fs.writeFileSync(roomPath, patchedRoom, 'utf8');
+        }
         runFfdec(ffdecPath, ['-importScript', swfPath, patchedSwfPath, scriptsRoot]);
         fs.copyFileSync(patchedSwfPath, outputPath);
         console.log(`Patched SWF written to ${outputPath}`);

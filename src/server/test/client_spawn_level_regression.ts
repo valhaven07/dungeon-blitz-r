@@ -6,6 +6,7 @@ import { EntityHandler } from '../handlers/EntityHandler';
 import { LevelHandler } from '../handlers/LevelHandler';
 import { BitBuffer } from '../network/protocol/bitBuffer';
 import { BitReader } from '../network/protocol/bitReader';
+import { NpcLoader } from '../data/NpcLoader';
 
 type SentPacket = {
     id: number;
@@ -16,13 +17,17 @@ type FakeClient = {
     token: number;
     character: { name: string };
     currentLevel: string;
+    levelInstanceId: string;
     currentRoomId: number;
     playerSpawned: boolean;
     clientEntID: number;
+    syncAnchorStartedAt: number;
+    startedRoomEvents: Set<string>;
     knownEntityIds: Set<number>;
     entities: Map<number, any>;
     sentPackets: SentPacket[];
     send: (id: number, payload: Buffer) => void;
+    sendBitBuffer: (id: number, bb: BitBuffer) => void;
 };
 
 let nextFakeToken = 1000;
@@ -39,6 +44,9 @@ function ensureLevelConfigLoaded(): void {
     if (!LevelConfig.has('TutorialDungeon')) {
         LevelConfig.load(path.resolve(__dirname, '../data'));
     }
+    if (NpcLoader.getRawNpcsForLevel('TutorialDungeon').length === 0) {
+        NpcLoader.load(path.resolve(__dirname, '../data'));
+    }
 }
 
 function createFakeClient(name: string): FakeClient {
@@ -48,14 +56,20 @@ function createFakeClient(name: string): FakeClient {
         token: nextFakeToken++,
         character: { name },
         currentLevel: 'NewbieRoad',
+        levelInstanceId: '',
         currentRoomId: 1,
         playerSpawned: true,
         clientEntID: 0,
+        syncAnchorStartedAt: 0,
+        startedRoomEvents: new Set<string>(),
         knownEntityIds: new Set<number>(),
         entities: new Map<number, any>(),
         sentPackets,
         send(id: number, payload: Buffer) {
             sentPackets.push({ id, payload: Buffer.from(payload) });
+        },
+        sendBitBuffer(id: number, bb: BitBuffer) {
+            sentPackets.push({ id, payload: bb.toBuffer() });
         }
     };
 }
@@ -63,6 +77,14 @@ function createFakeClient(name: string): FakeClient {
 function parseDestroyEntityId(payload: Buffer): number {
     const br = new BitReader(payload);
     return br.readMethod4();
+}
+
+function parseRoomEventStart(payload: Buffer): { roomId: number; flag: boolean } {
+    const br = new BitReader(payload);
+    return {
+        roomId: br.readMethod4(),
+        flag: br.readMethod15()
+    };
 }
 
 function testOutdoorLevelsUseClientSpawn(): void {
@@ -790,6 +812,68 @@ function testOutdoorHostileIncrementalUpdatesRelayToPartyPeers(): void {
     );
 }
 
+function testDungeonJoinerReplaysStartedRoomEventsFromPartyAnchor(): void {
+    const anchor = createFakeClient('Alpha');
+    const joiner = createFakeClient('Beta');
+
+    anchor.currentLevel = 'TutorialDungeon';
+    joiner.currentLevel = 'TutorialDungeon';
+    anchor.levelInstanceId = '41035';
+    joiner.levelInstanceId = '41035';
+    anchor.currentRoomId = 5;
+    joiner.currentRoomId = 0;
+    anchor.syncAnchorStartedAt = 100;
+    joiner.syncAnchorStartedAt = 50;
+    anchor.clientEntID = 7001;
+    joiner.clientEntID = 7002;
+
+    anchor.startedRoomEvents.add('TutorialDungeon:0');
+    anchor.startedRoomEvents.add('TutorialDungeon:1');
+    anchor.startedRoomEvents.add('TutorialDungeon:5');
+    joiner.startedRoomEvents.add('TutorialDungeon:0');
+
+    const anchorProps = {
+        id: anchor.clientEntID,
+        name: 'Alpha',
+        isPlayer: true,
+        x: 100,
+        y: 200,
+        team: 1,
+        entState: 0
+    };
+
+    anchor.entities.set(anchor.clientEntID, anchorProps);
+    joiner.entities.set(joiner.clientEntID, {
+        id: joiner.clientEntID,
+        name: 'Beta',
+        isPlayer: true,
+        x: 120,
+        y: 200,
+        team: 1,
+        entState: 0
+    });
+
+    GlobalState.sessionsByToken.set(anchor.token, anchor as never);
+    GlobalState.sessionsByToken.set(joiner.token, joiner as never);
+    GlobalState.partyByMember.set('alpha', 77);
+    GlobalState.partyByMember.set('beta', 77);
+
+    (EntityHandler as any).sendExistingPlayersToJoiner(joiner as never);
+
+    const roomPackets = joiner.sentPackets.filter((packet) => packet.id === 0xA5);
+    assert.deepEqual(
+        roomPackets.map((packet) => parseRoomEventStart(packet.payload)),
+        [
+            { roomId: 1, flag: true },
+            { roomId: 5, flag: true }
+        ],
+        'joiner should replay missing dungeon room starts from the party anchor only once'
+    );
+    assert.equal(joiner.currentRoomId, 5, 'joiner should inherit the party anchor room before visible client-spawn seeding');
+    assert.equal(joiner.startedRoomEvents.has('TutorialDungeon:1'), true);
+    assert.equal(joiner.startedRoomEvents.has('TutorialDungeon:5'), true);
+}
+
 function main(): void {
     ensureLevelConfigLoaded();
 
@@ -882,6 +966,11 @@ function main(): void {
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
         testOutdoorHostileIncrementalUpdatesRelayToPartyPeers();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testDungeonJoinerReplaysStartedRoomEventsFromPartyAnchor();
     } finally {
         GlobalState.levelEntities = levelEntities;
         GlobalState.sessionsByToken = sessionsByToken;
