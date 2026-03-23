@@ -11,8 +11,18 @@ import {
   writeU30,
 } from "./swfPatchUtils";
 
-const OLD_LINE = "4 Boss <Goto Red 1>You're the one that killed our Kraken!";
-const NEW_LINE = "4 Boss You're the one that killed our Kraken!";
+const LINE_REPLACEMENTS = [
+  {
+    current: "4 Boss <Goto Red 1>You're the one that killed our Kraken!",
+    target: "4 Boss <Charge><Goto Red 1>You're the one that killed our Kraken!",
+    detail: "Force Charge emote during boss walk-in line",
+  },
+  {
+    current: "8 Boss That was the last of our Monster Fleet!",
+    target: "8 Boss <Charge><Goto Red 1>That was the last of our Monster Fleet!",
+    detail: "Force Charge emote during boss approach taunt",
+  },
+] as const;
 
 function resolveSwfPath(args: string[]): string {
   const idx = args.indexOf("--swf-path");
@@ -26,32 +36,38 @@ function hasFlag(args: string[], flag: string): boolean {
   return args.includes(flag);
 }
 
-function findLinePatch(swfPath: string): { ctx: ReturnType<typeof parseSwf>; patches: BytePatch[]; currentLine: string } {
+function findLinePatches(swfPath: string): { ctx: ReturnType<typeof parseSwf>; patches: BytePatch[]; statuses: string[] } {
   const ctx = parseSwf(swfPath);
   const abc = parseAbc(ctx);
+  const patches: BytePatch[] = [];
+  const statuses: string[] = [];
 
-  if (abc.stringValues.includes(NEW_LINE)) {
-    return { ctx, patches: [], currentLine: NEW_LINE };
+  for (const replacement of LINE_REPLACEMENTS) {
+    if (abc.stringValues.includes(replacement.target)) {
+      statuses.push(`Current line: ${replacement.target}`);
+      continue;
+    }
+
+    const idx = abc.stringValues.indexOf(replacement.current);
+    if (idx === -1) {
+      throw new PatchError(`Goblin boss intro line not found in ABC string pool: ${replacement.current}`);
+    }
+
+    const lenPos = abc.stringLenPositions[idx];
+    const dataPos = abc.stringDataPositions[idx];
+    const oldBytes = Buffer.from(replacement.current, "utf8");
+    const newBytes = Buffer.from(replacement.target, "utf8");
+    patches.push({
+      key: `levelsnr_goblin_boss_intro_${patches.length}`,
+      start: lenPos,
+      end: dataPos + oldBytes.length,
+      data: Buffer.concat([writeU30(newBytes.length), newBytes]),
+      detail: replacement.detail,
+    });
+    statuses.push(`Current line: ${replacement.current}`);
   }
 
-  const idx = abc.stringValues.indexOf(OLD_LINE);
-  if (idx === -1) {
-    throw new PatchError("Goblin boss intro line not found in ABC string pool");
-  }
-
-  const lenPos = abc.stringLenPositions[idx];
-  const dataPos = abc.stringDataPositions[idx];
-  const oldBytes = Buffer.from(OLD_LINE, "utf8");
-  const newBytes = Buffer.from(NEW_LINE, "utf8");
-  const patch: BytePatch = {
-    key: "levelsnr_goblin_boss_intro",
-    start: lenPos,
-    end: dataPos + oldBytes.length,
-    data: Buffer.concat([writeU30(newBytes.length), newBytes]),
-    detail: "Remove broken <Goto Red 1> token from Goblin boss intro cutscene",
-  };
-
-  return { ctx, patches: [patch], currentLine: OLD_LINE };
+  return { ctx, patches, statuses };
 }
 
 function main(): number {
@@ -60,17 +76,21 @@ function main(): number {
   const verifyOnly = hasFlag(args, "--verify") || hasFlag(args, "--dry-run");
 
   try {
-    const { ctx, patches, currentLine } = findLinePatch(swfPath);
+    const { ctx, patches, statuses } = findLinePatches(swfPath);
     console.log(`SWF: ${swfPath}`);
-    console.log(`Current line: ${currentLine}`);
-    console.log(`Replacement:  ${NEW_LINE}`);
+    for (let i = 0; i < LINE_REPLACEMENTS.length; i += 1) {
+      console.log(statuses[i]);
+      console.log(`Replacement:  ${LINE_REPLACEMENTS[i].target}`);
+    }
 
     if (patches.length === 0) {
       console.log("No changes needed.");
       return 0;
     }
 
-    console.log(`Patch: ${patches[0].detail}`);
+    for (const patch of patches) {
+      console.log(`Patch: ${patch.detail}`);
+    }
     if (verifyOnly) {
       return 0;
     }

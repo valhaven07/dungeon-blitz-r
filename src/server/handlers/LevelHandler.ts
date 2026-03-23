@@ -14,7 +14,7 @@ import { Config } from '../core/config';
 import { MissionLoader } from '../data/MissionLoader';
 import { NpcLoader, NpcDef } from '../data/NpcLoader';
 import { MissionID } from '../data/runtime';
-import { Entity } from '../core/Entity';
+import { Entity, EntityTeam } from '../core/Entity';
 import { EntityHandler } from './EntityHandler';
 import { JsonAdapter } from '../database/JsonAdapter';
 import { normalizeCharacterKey, PendingTeleport } from '../core/SocialState';
@@ -51,6 +51,12 @@ type TransferSyncAnchorCandidate = {
 };
 
 export class LevelHandler {
+    private static readonly GOBLIN_RIVER_BOSS_INTRO_TEXTS = new Set<string>([
+        "You're the one that killed our Kraken!",
+        'That was the last of our Monster Fleet!'
+    ]);
+    private static readonly GOBLIN_RIVER_BOSS_INTRO_DEFAULT_MS = 5000;
+
     private static cloneTransferGameplayState(target: Client, source: Client): void {
         target.character = source.character;
         target.userId = source.userId;
@@ -1752,6 +1758,11 @@ export class LevelHandler {
         clearClientSpawnFallbackTimer(client);
         clearKeepTutorialTimers(client.keepTutorialState);
         client.keepTutorialState = null;
+        if (client.goblinRiverBossIntroUnlockTimer) {
+            clearTimeout(client.goblinRiverBossIntroUnlockTimer);
+            client.goblinRiverBossIntroUnlockTimer = null;
+        }
+        client.goblinRiverBossIntroLockUntil = 0;
         client.clientSpawnConfirmed = false;
         client.entities.delete(oldClientEntId);
         EntityHandler.removeOwnedEntities(client);
@@ -1799,6 +1810,77 @@ export class LevelHandler {
             client.currentRoomId = roomId;
             LevelHandler.maybeTriggerTutorialDungeonGoblinScene(client, previousRoomId, roomId);
         }
+    }
+
+    static isGoblinRiverBossIntroLocked(client: Client): boolean {
+        return Date.now() < Number(client.goblinRiverBossIntroLockUntil ?? 0);
+    }
+
+    private static setGoblinRiverHostilesUntargetable(client: Client, untargetable: boolean): void {
+        const levelMap = LevelHandler.getCurrentLevelMap(client);
+        if (!levelMap) {
+            return;
+        }
+
+        for (const recipient of LevelHandler.forLevelRecipients(client, true)) {
+            for (const [entityId, entity] of levelMap.entries()) {
+                if (!entity || Number(entity.team ?? 0) !== EntityTeam.ENEMY) {
+                    continue;
+                }
+
+                entity.untargetable = untargetable;
+                const localEntity = recipient.entities.get(entityId);
+                if (localEntity) {
+                    localEntity.untargetable = untargetable;
+                }
+                LevelHandler.sendSetUntargetable(recipient, entityId, untargetable);
+            }
+        }
+    }
+
+    private static clearGoblinRiverBossIntroLock(client: Client): void {
+        if (client.goblinRiverBossIntroUnlockTimer) {
+            clearTimeout(client.goblinRiverBossIntroUnlockTimer);
+            client.goblinRiverBossIntroUnlockTimer = null;
+        }
+        client.goblinRiverBossIntroLockUntil = 0;
+        LevelHandler.setGoblinRiverHostilesUntargetable(client, false);
+    }
+
+    static maybeStartGoblinRiverBossIntroLock(client: Client, entityId: number, text: string): void {
+        if (client.currentLevel !== 'GoblinRiverDungeon') {
+            return;
+        }
+        if (!LevelHandler.GOBLIN_RIVER_BOSS_INTRO_TEXTS.has(String(text ?? '').trim())) {
+            return;
+        }
+
+        const entity =
+            client.entities.get(entityId) ??
+            LevelHandler.getCurrentLevelMap(client)?.get(entityId);
+        const entityName = String(entity?.name ?? '');
+        if (entityName !== 'GoblinBoss2' && entityName !== 'GoblinBoss2Hard') {
+            return;
+        }
+
+        const lockUntil = Date.now() + LevelHandler.GOBLIN_RIVER_BOSS_INTRO_DEFAULT_MS;
+        client.goblinRiverBossIntroLockUntil = Math.max(client.goblinRiverBossIntroLockUntil, lockUntil);
+        LevelHandler.setGoblinRiverHostilesUntargetable(client, true);
+
+        if (client.goblinRiverBossIntroUnlockTimer) {
+            clearTimeout(client.goblinRiverBossIntroUnlockTimer);
+        }
+
+        const levelScope = getClientLevelScope(client);
+        const levelName = client.currentLevel;
+        client.goblinRiverBossIntroUnlockTimer = setTimeout(() => {
+            client.goblinRiverBossIntroUnlockTimer = null;
+            if (client.currentLevel !== levelName || getClientLevelScope(client) !== levelScope) {
+                client.goblinRiverBossIntroLockUntil = 0;
+                return;
+            }
+            LevelHandler.clearGoblinRiverBossIntroLock(client);
+        }, LevelHandler.GOBLIN_RIVER_BOSS_INTRO_DEFAULT_MS);
     }
 
     private static markRoomEventStarted(client: Client, roomId: number): void {
