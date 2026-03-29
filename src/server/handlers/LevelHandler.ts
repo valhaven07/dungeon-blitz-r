@@ -21,7 +21,7 @@ import { MissionHandler } from './MissionHandler';
 import { JsonAdapter } from '../database/JsonAdapter';
 import { normalizeCharacterKey, PendingTeleport } from '../core/SocialState';
 import { TransferTokenAllocator } from '../core/TransferTokenAllocator';
-import { areClientsInSameParty, getPartyIdForClient } from '../core/PartySync';
+import { areClientsInSameParty, getPartyIdForClient, sharesRoomIds } from '../core/PartySync';
 import {
     areClientsInSameLevelScope,
     createDungeonInstanceId,
@@ -596,8 +596,10 @@ export class LevelHandler {
     private static readonly KEEP_TUTORIAL_FIRST_PARROT_X = 7271;
     private static readonly KEEP_TUTORIAL_SECOND_PARROT_X = 17981;
     private static readonly TUTORIAL_DUNGEON_INTRO_PARROT_ID = 384606;
-    private static readonly TUTORIAL_DUNGEON_ROOM_FIVE_PARROT_ID = 712286;
-    private static readonly TUTORIAL_DUNGEON_GOBLIN_SCENE_ROOM_ID = 5;
+    private static readonly TUTORIAL_DUNGEON_TRAVERSAL_ROOM_ID = 4;
+    private static readonly TUTORIAL_DUNGEON_JUMP_X_THRESHOLD = 7350;
+    private static readonly TUTORIAL_DUNGEON_DROP_Y_THRESHOLD = 2150;
+    private static readonly TUTORIAL_DUNGEON_DROP_ROOM_EVENT = 5;
     private static readonly TUTORIAL_DUNGEON_INTRO_LINE =
         'Squawk! Goblins! Goblins everywhere! Help Pecky!';
 
@@ -711,24 +713,6 @@ export class LevelHandler {
             }
             other.send(0x76, payload);
         }
-    }
-
-    private static maybeTriggerTutorialDungeonGoblinScene(client: Client, previousRoomId: number, roomId: number): void {
-        if (
-            client.currentLevel !== 'TutorialDungeon' ||
-            previousRoomId === roomId ||
-            roomId !== LevelHandler.TUTORIAL_DUNGEON_GOBLIN_SCENE_ROOM_ID ||
-            !LevelHandler.hasRoomEventStarted(client, 4)
-        ) {
-            return;
-        }
-
-        LevelHandler.sendRoomThought(
-            client.currentLevel,
-            LevelHandler.TUTORIAL_DUNGEON_ROOM_FIVE_PARROT_ID,
-            LevelHandler.TUTORIAL_DUNGEON_INTRO_LINE,
-            client.levelInstanceId
-        );
     }
 
     private static sendRoomCutSceneStart(
@@ -1378,6 +1362,45 @@ export class LevelHandler {
         return bestId;
     }
 
+    private static findTutorialDungeonParrotId(client: Client, targetX: number): number | null {
+        let bestId: number | null = null;
+        let bestDistance = Number.POSITIVE_INFINITY;
+
+        const seen = new Set<number>();
+        const sources: Array<Map<number, any> | undefined> = [
+            client.entities,
+            LevelHandler.getCurrentLevelMap(client) ?? undefined
+        ];
+
+        for (const source of sources) {
+            if (!source) {
+                continue;
+            }
+
+            for (const [entityId, entity] of source.entries()) {
+                if (seen.has(entityId)) {
+                    continue;
+                }
+                seen.add(entityId);
+
+                const entityName = String(entity?.name ?? entity?.props?.name ?? '');
+                const entityTeam = Number(entity?.team ?? entity?.props?.team ?? 0);
+                if (entityName !== 'IntroParrot' || entityTeam !== 3) {
+                    continue;
+                }
+
+                const entityX = Number(entity?.x ?? entity?.props?.x ?? entity?.props?.pos_x ?? 0);
+                const distance = Math.abs(entityX - targetX);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestId = entityId;
+                }
+            }
+        }
+
+        return bestId;
+    }
+
     private static maybeTriggerCraftTownTutorialParrot(client: Client, newX: number): void {
         const state = LevelHandler.getCraftTownTutorialState(client);
         if (!state || state.bossDefeated) {
@@ -1842,14 +1865,93 @@ export class LevelHandler {
 
     private static cacheRoomId(client: Client, roomId: number): void {
         if (Number.isFinite(roomId) && roomId >= 0) {
-            const previousRoomId = client.currentRoomId;
             client.currentRoomId = roomId;
-            LevelHandler.maybeTriggerTutorialDungeonGoblinScene(client, previousRoomId, roomId);
+            LevelHandler.maybeStartTutorialDungeonTraversalTutorial(client, roomId);
         }
     }
 
     static isGoblinRiverBossIntroLocked(client: Client): boolean {
-        return Date.now() < Number(client.goblinRiverBossIntroLockUntil ?? 0);
+        const currentLockUntil = Number(client.goblinRiverBossIntroLockUntil ?? 0);
+        if (currentLockUntil > Date.now()) {
+            return true;
+        }
+
+        const levelScope = getClientLevelScope(client);
+        if (!levelScope) {
+            return false;
+        }
+
+        for (const other of GlobalState.sessionsByToken.values()) {
+            if (!other.playerSpawned || getClientLevelScope(other) !== levelScope) {
+                continue;
+            }
+            if (!sharesRoomIds(client.currentRoomId, other.currentRoomId)) {
+                continue;
+            }
+            if (Number(other.goblinRiverBossIntroLockUntil ?? 0) > Date.now()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static maybeStartTutorialDungeonTraversalTutorial(client: Client, roomId: number): void {
+        if (
+            client.currentLevel !== 'TutorialDungeon' ||
+            !Number.isFinite(roomId) ||
+            roomId < 0 ||
+            roomId !== LevelHandler.TUTORIAL_DUNGEON_TRAVERSAL_ROOM_ID ||
+            LevelHandler.hasRoomEventStarted(client, roomId)
+        ) {
+            return;
+        }
+
+        const player = client.entities.get(client.clientEntID);
+        const playerX = Number(player?.x ?? client.character?.CurrentLevel?.x ?? 0);
+        const playerY = Number(player?.y ?? client.character?.CurrentLevel?.y ?? 0);
+        const parrotId = LevelHandler.findTutorialDungeonParrotId(client, playerX);
+        if (parrotId !== null) {
+            const parrot = client.entities.get(parrotId);
+            const parrotX = Number(parrot?.x ?? playerX);
+            LevelHandler.teleportParrot(client, parrotId, parrotX, playerY - 100);
+        }
+
+        LevelHandler.sendRoomEventStart(client, roomId, true);
+    }
+
+    private static maybeTriggerTutorialDungeonDropTutorial(
+        client: Client,
+        currentX: number,
+        currentY: number,
+        flags?: { bJumping?: boolean; bDropping?: boolean }
+    ): void {
+        const roomId = client.currentRoomId;
+        if (client.currentLevel !== 'TutorialDungeon' || roomId !== LevelHandler.TUTORIAL_DUNGEON_TRAVERSAL_ROOM_ID) {
+            return;
+        }
+
+        const performedTraversalInput = Boolean(flags?.bJumping || flags?.bDropping);
+        const hasJumped = currentX > LevelHandler.TUTORIAL_DUNGEON_JUMP_X_THRESHOLD;
+        const hasDropped = currentY > LevelHandler.TUTORIAL_DUNGEON_DROP_Y_THRESHOLD;
+
+        if (
+            (performedTraversalInput || hasJumped || hasDropped) &&
+            !LevelHandler.hasRoomEventStarted(client, LevelHandler.TUTORIAL_DUNGEON_DROP_ROOM_EVENT)
+        ) {
+            LevelHandler.sendRoomEventStart(client, LevelHandler.TUTORIAL_DUNGEON_DROP_ROOM_EVENT, true);
+
+            const parrotId = LevelHandler.findTutorialDungeonParrotId(client, currentX);
+            if (parrotId !== null) {
+                LevelHandler.teleportParrot(client, parrotId, currentX, currentY - 100);
+                LevelHandler.sendRoomThought(
+                    client.currentLevel,
+                    parrotId,
+                    LevelHandler.TUTORIAL_DUNGEON_INTRO_LINE,
+                    client.levelInstanceId
+                );
+            }
+        }
     }
 
     private static setGoblinRiverHostilesUntargetable(client: Client, untargetable: boolean): void {
@@ -1858,18 +1960,33 @@ export class LevelHandler {
             return;
         }
 
-        for (const recipient of LevelHandler.forLevelRecipients(client, true)) {
-            for (const [entityId, entity] of levelMap.entries()) {
-                if (!entity || Number(entity.team ?? 0) !== EntityTeam.ENEMY) {
-                    continue;
-                }
+        const targetState = untargetable ? 2 : 0;
+        for (const [entityId, entity] of levelMap.entries()) {
+            if (!entity || Boolean(entity.isPlayer)) {
+                continue;
+            }
 
-                entity.untargetable = untargetable;
+            const entityRoomId = Number(entity.roomId ?? -1);
+            if (!sharesRoomIds(client.currentRoomId, entityRoomId)) {
+                continue;
+            }
+
+            entity.untargetable = untargetable;
+            entity.entState = targetState;
+
+            for (const recipient of LevelHandler.forLevelRecipients(client, true)) {
                 const localEntity = recipient.entities.get(entityId);
                 if (localEntity) {
                     localEntity.untargetable = untargetable;
+                    localEntity.entState = targetState;
                 }
                 LevelHandler.sendSetUntargetable(recipient, entityId, untargetable);
+                LevelHandler.sendNpcState(
+                    recipient,
+                    entityId,
+                    targetState,
+                    Boolean(entity.facing_left ?? entity.facingLeft)
+                );
             }
         }
     }
@@ -1879,12 +1996,20 @@ export class LevelHandler {
             clearTimeout(client.goblinRiverBossIntroUnlockTimer);
             client.goblinRiverBossIntroUnlockTimer = null;
         }
+        if (client.currentLevel) {
+            LevelHandler.sendRoomCutSceneEnd(client.currentLevel, Math.max(0, client.currentRoomId), client.levelInstanceId);
+        }
         client.goblinRiverBossIntroLockUntil = 0;
         LevelHandler.setGoblinRiverHostilesUntargetable(client, false);
     }
 
+    private static isGoblinRiverBossIntroLevel(levelName: string | null | undefined): boolean {
+        const normalizedLevel = LevelConfig.normalizeLevelName(levelName);
+        return normalizedLevel === 'GoblinRiverDungeon' || normalizedLevel === 'GoblinRiverDungeonHard';
+    }
+
     static maybeStartGoblinRiverBossIntroLock(client: Client, entityId: number, text: string): void {
-        if (client.currentLevel !== 'GoblinRiverDungeon') {
+        if (!LevelHandler.isGoblinRiverBossIntroLevel(client.currentLevel)) {
             return;
         }
         if (!LevelHandler.GOBLIN_RIVER_BOSS_INTRO_TEXTS.has(String(text ?? '').trim())) {
@@ -1895,12 +2020,30 @@ export class LevelHandler {
             client.entities.get(entityId) ??
             LevelHandler.getCurrentLevelMap(client)?.get(entityId);
         const entityName = String(entity?.name ?? '');
-        if (entityName !== 'GoblinBoss2' && entityName !== 'GoblinBoss2Hard') {
+        if (
+            entityName !== 'GoblinBoss1' &&
+            entityName !== 'GoblinBoss1Hard' &&
+            entityName !== 'GoblinBoss2' &&
+            entityName !== 'GoblinBoss2Hard'
+        ) {
             return;
         }
 
         const lockUntil = Date.now() + LevelHandler.GOBLIN_RIVER_BOSS_INTRO_DEFAULT_MS;
-        client.goblinRiverBossIntroLockUntil = Math.max(client.goblinRiverBossIntroLockUntil, lockUntil);
+        const existingLockUntil = Number(client.goblinRiverBossIntroLockUntil ?? 0);
+        const wasLocked = Number.isFinite(existingLockUntil) && existingLockUntil > Date.now();
+        client.goblinRiverBossIntroLockUntil = Math.max(
+            Number.isFinite(existingLockUntil) ? existingLockUntil : 0,
+            lockUntil
+        );
+        if (!wasLocked && client.currentLevel) {
+            LevelHandler.sendRoomCutSceneStart(
+                client.currentLevel,
+                Math.max(0, client.currentRoomId),
+                false,
+                client.levelInstanceId
+            );
+        }
         LevelHandler.setGoblinRiverHostilesUntargetable(client, true);
 
         if (client.goblinRiverBossIntroUnlockTimer) {
@@ -2202,7 +2345,11 @@ export class LevelHandler {
             return;
         }
 
-        for (const roomId of [0, 1]) {
+        const initialRoomIds = client.currentLevel === 'TutorialDungeon'
+            ? [0, 1, LevelHandler.TUTORIAL_DUNGEON_TRAVERSAL_ROOM_ID]
+            : [0, 1];
+
+        for (const roomId of initialRoomIds) {
             if (!LevelHandler.hasRoomEventStarted(client, roomId)) {
                 LevelHandler.sendRoomEventStart(client, roomId, true);
             }
@@ -2705,6 +2852,18 @@ export class LevelHandler {
 
             if (currentLevel === 'CraftTownTutorial') {
                 LevelHandler.maybeTriggerCraftTownTutorialParrot(client, Number(ent.x ?? 0));
+            }
+
+            if (currentLevel === 'TutorialDungeon') {
+                LevelHandler.maybeTriggerTutorialDungeonDropTutorial(
+                    client,
+                    Number(ent.x ?? 0),
+                    Number(ent.y ?? 0),
+                    {
+                        bJumping: flags.bJumping,
+                        bDropping: flags.bDropping,
+                    }
+                );
             }
         }
 

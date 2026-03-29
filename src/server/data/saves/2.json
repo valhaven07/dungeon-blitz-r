@@ -4,9 +4,9 @@
     {
       "name": "Spepyluv",
       "class": "Paladin",
-      "level": 1,
-      "xp": 61,
-      "gold": 186,
+      "level": 2,
+      "xp": 193,
+      "gold": 896,
       "craftXP": 0,
       "DragonOre": 0,
       "mammothIdols": 0,
@@ -50,7 +50,7 @@
           ]
         },
         {
-          "gearID": 0,
+          "gearID": 18,
           "tier": 0,
           "runes": [
             0,
@@ -104,8 +104,8 @@
       ],
       "CurrentLevel": {
         "name": "NewbieRoad",
-        "x": 1421,
-        "y": 826
+        "x": 1029,
+        "y": 155
       },
       "PreviousLevel": {
         "name": "NewbieRoad",
@@ -138,6 +138,19 @@
             0,
             0
           ]
+        },
+        {
+          "gearID": 18,
+          "tier": 0,
+          "runes": [
+            0,
+            0,
+            0
+          ],
+          "colors": [
+            0,
+            0
+          ]
         }
       ],
       "gearSets": [],
@@ -149,10 +162,18 @@
       "materials": [
         {
           "materialID": 92,
-          "count": 2
+          "count": 3
         },
         {
           "materialID": 91,
+          "count": 9
+        },
+        {
+          "materialID": 35,
+          "count": 1
+        },
+        {
+          "materialID": 93,
           "count": 1
         }
       ],
@@ -175,10 +196,31 @@
           "complete": 1
         },
         "2": {
-          "state": 2
+          "state": 3,
+          "claimed": 1,
+          "complete": 1
+        },
+        "3": {
+          "state": 3,
+          "currCount": 1,
+          "Tier": 10,
+          "highscore": 99999999,
+          "Time": 1774800574,
+          "claimed": 1,
+          "complete": 1
+        },
+        "4": {
+          "state": 2,
+          "currCount": 0
+        },
+        "80": {
+          "state": 3,
+          "currCount": 1,
+          "claimed": 1,
+          "complete": 1
         }
       },
-      "questTrackerState": 1,
+      "questTrackerState": 66,
       "friends": [],
       "learnedAbilities": [
         {

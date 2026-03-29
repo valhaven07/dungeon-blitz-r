@@ -601,25 +601,39 @@ function testPrimeTutorialRoomEventsSeedsTutorialDungeonIntroThought(): void {
 
     assert.equal(client.startedRoomEvents.has('TutorialDungeon:0'), true);
     assert.equal(client.startedRoomEvents.has('TutorialDungeon:1'), true);
+    assert.equal(client.startedRoomEvents.has('TutorialDungeon:4'), true);
     assert.deepEqual(
         client.sentPackets.map((packet: { id: number }) => packet.id),
-        [0xA5, 0xA5, 0x76]
+        [0xA5, 0xA5, 0xA5, 0x76]
     );
 }
 
-function testTutorialDungeonGoblinSceneStartsOnRoomFiveEntry(): void {
+function testTutorialDungeonTraversalTutorialStartsOnRoomFourEntry(): void {
     const client = createClient();
     client.token = 8002;
     client.currentLevel = 'TutorialDungeon';
     client.playerSpawned = true;
-    client.startedRoomEvents.add('TutorialDungeon:4');
     GlobalState.sessionsByToken.set(client.token, client as never);
 
-    (LevelHandler as any).cacheRoomId(client, 5);
+    (LevelHandler as any).cacheRoomId(client, 4);
 
-    assert.equal(client.currentRoomId, 5);
-    assert.equal(client.startedRoomEvents.has('TutorialDungeon:5'), false);
-    assert.deepEqual(client.sentPackets.map((packet: { id: number }) => packet.id), [0x76]);
+    assert.equal(client.currentRoomId, 4);
+    assert.equal(client.startedRoomEvents.has('TutorialDungeon:4'), true);
+    assert.deepEqual(client.sentPackets.map((packet: { id: number }) => packet.id), [0xA5]);
+}
+
+function testTutorialDungeonDropTutorialStartsRoomFiveOnTraversalInput(): void {
+    const client = createClient();
+    client.currentLevel = 'TutorialDungeon';
+    client.currentRoomId = 4;
+
+    (LevelHandler as any).maybeTriggerTutorialDungeonDropTutorial(client, 7360, 2200, {
+        bJumping: true,
+        bDropping: false
+    });
+
+    assert.equal(client.startedRoomEvents.has('TutorialDungeon:5'), true);
+    assert.deepEqual(client.sentPackets.map((packet: { id: number }) => packet.id), [0xA5]);
 }
 
 function testDisconnectDuringDoorTransferPreservesRecoveryState(): void {
@@ -909,7 +923,9 @@ function main(): void {
 
         testPrimeTutorialRoomEventsSeedsTutorialDungeonIntroThought();
 
-        testTutorialDungeonGoblinSceneStartsOnRoomFiveEntry();
+        testTutorialDungeonTraversalTutorialStartsOnRoomFourEntry();
+
+        testTutorialDungeonDropTutorialStartsRoomFiveOnTraversalInput();
     } finally {
         GlobalState.sessionsByToken = sessionsByToken;
         GlobalState.sessionsByUserId = sessionsByUserId;
