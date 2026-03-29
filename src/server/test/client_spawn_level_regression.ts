@@ -33,6 +33,7 @@ type FakeClient = {
 };
 
 let nextFakeToken = 1000;
+const GOBLIN_RIVER_LEVELS = ['GoblinRiverDungeon', 'GoblinRiverDungeonHard'] as const;
 
 
 // MOCK SETTIMEOUT FOR SYNCHRONOUS TESTS
@@ -91,11 +92,12 @@ function parseRoomEventStart(payload: Buffer): { roomId: number; flag: boolean }
     };
 }
 
-function testOutdoorLevelsUseClientSpawn(): void {
+function testConfiguredLevelsUseClientSpawn(): void {
     for (const levelName of [
         'CraftTown',
         'BridgeTown',
         'BridgeTownHard',
+        ...GOBLIN_RIVER_LEVELS,
         'SwampRoadNorth',
         'SwampRoadConnection',
         'OldMineMountain',
@@ -138,6 +140,42 @@ function testClientSpawnLevelsStartEmptyWithoutServerNpcInit(): void {
     assert.ok(levelMap, 'client-spawn level should still have a state bucket');
     assert.equal(levelMap?.size, 0, 'server should not seed outdoor NPCs for client-spawn levels');
     assert.equal(client.sentPackets.length, 0);
+}
+
+function testGoblinRiverClientSpawnLevelsPruneServerNpcCopies(): void {
+    for (const levelName of GOBLIN_RIVER_LEVELS) {
+        const client = createFakeClient('Watcher');
+        client.currentLevel = levelName;
+
+        const levelMap = new Map<number, any>([
+            [9101, { id: 9101, name: 'ServerGoblin', isPlayer: false, clientSpawned: false }],
+            [9102, { id: 9102, name: 'ClientGoblin', isPlayer: false, clientSpawned: true }],
+            [9103, { id: 9103, name: 'OtherPlayer', isPlayer: true }]
+        ]);
+
+        GlobalState.levelEntities.set(levelName, levelMap);
+
+        EntityHandler.sendInitialLevelEntities(client as never, levelName);
+
+        assert.equal(levelMap.has(9101), false, `${levelName} should prune stale server-seeded hostiles`);
+        assert.equal(levelMap.has(9102), true, `${levelName} should preserve canonical client-spawn hostiles`);
+        assert.equal(levelMap.has(9103), true, `${levelName} should preserve players`);
+        assert.equal(client.sentPackets.length, 0, `${levelName} should not seed server NPC packets`);
+    }
+}
+
+function testGoblinRiverClientSpawnLevelsStartEmptyWithoutServerNpcInit(): void {
+    for (const levelName of GOBLIN_RIVER_LEVELS) {
+        const client = createFakeClient('Watcher');
+        client.currentLevel = levelName;
+
+        EntityHandler.sendInitialLevelEntities(client as never, levelName);
+
+        const levelMap = GlobalState.levelEntities.get(levelName);
+        assert.ok(levelMap, `${levelName} should create a level state bucket`);
+        assert.equal(levelMap?.size, 0, `${levelName} should start empty until the client spawns hostiles`);
+        assert.equal(client.sentPackets.length, 0, `${levelName} should not send server NPCs on join`);
+    }
 }
 
 function testOutdoorHostileClientSpawnIsNotSeededToPeers(): void {
@@ -878,6 +916,188 @@ function testDungeonJoinerReplaysStartedRoomEventsFromPartyAnchor(): void {
     assert.equal(joiner.startedRoomEvents.has('TutorialDungeon:5'), true);
 }
 
+function testGoblinRiverDungeonHostileClientSpawnSeedsToPartyPeersOnly(): void {
+    for (const levelName of GOBLIN_RIVER_LEVELS) {
+        const owner = createFakeClient('Alpha');
+        const partyWatcher = createFakeClient('Beta');
+        const stranger = createFakeClient('Gamma');
+
+        owner.currentLevel = levelName;
+        partyWatcher.currentLevel = levelName;
+        stranger.currentLevel = levelName;
+        owner.levelInstanceId = 'gr-shared';
+        partyWatcher.levelInstanceId = 'gr-shared';
+        stranger.levelInstanceId = 'gr-shared';
+        owner.currentRoomId = 2;
+        partyWatcher.currentRoomId = 8;
+        stranger.currentRoomId = 2;
+
+        const hostile = {
+            id: 4810,
+            name: 'GoblinClub',
+            isPlayer: false,
+            x: 180,
+            y: 240,
+            v: 0,
+            team: 2,
+            entState: 0,
+            clientSpawned: true,
+            ownerToken: owner.token,
+            roomId: owner.currentRoomId
+        };
+
+        GlobalState.levelEntities.set(`${levelName}#gr-shared`, new Map([[hostile.id, hostile]]));
+        GlobalState.sessionsByToken.set(owner.token, owner as never);
+        GlobalState.sessionsByToken.set(partyWatcher.token, partyWatcher as never);
+        GlobalState.sessionsByToken.set(stranger.token, stranger as never);
+        GlobalState.partyByMember.set('alpha', 191);
+        GlobalState.partyByMember.set('beta', 191);
+
+        const partyKnown = EntityHandler.ensureEntityKnown(partyWatcher as never, levelName, hostile.id);
+        const strangerKnown = EntityHandler.ensureEntityKnown(stranger as never, levelName, hostile.id);
+
+        assert.equal(partyKnown, true, `${levelName} should seed canonical hostiles to party joiners`);
+        assert.deepEqual(
+            partyWatcher.sentPackets.map((packet) => packet.id),
+            [0x0F],
+            `${levelName} party joiner should receive one canonical hostile seed`
+        );
+        assert.equal(strangerKnown, false, `${levelName} should not seed client hostiles to non-party viewers`);
+        assert.equal(stranger.sentPackets.length, 0, `${levelName} non-party viewers should receive no hostile seed`);
+    }
+}
+
+function testGoblinRiverDungeonPartyAuthoritySuppressesDuplicateHostileSpawnsAcrossUnsyncedRooms(): void {
+    for (const levelName of GOBLIN_RIVER_LEVELS) {
+        const owner = createFakeClient('Alpha');
+        const follower = createFakeClient('Beta');
+
+        owner.currentLevel = levelName;
+        follower.currentLevel = levelName;
+        owner.levelInstanceId = 'gr-unsynced';
+        follower.levelInstanceId = 'gr-unsynced';
+        owner.currentRoomId = 4;
+        follower.currentRoomId = 0;
+
+        const canonical = {
+            id: 5302,
+            name: 'GoblinArmorAxe',
+            isPlayer: false,
+            x: 120,
+            y: 220,
+            v: 0,
+            team: 2,
+            entState: 0,
+            clientSpawned: true,
+            ownerToken: owner.token,
+            ownerPartyId: 198,
+            roomId: owner.currentRoomId
+        };
+
+        GlobalState.levelEntities.set(`${levelName}#gr-unsynced`, new Map([[canonical.id, canonical]]));
+        GlobalState.sessionsByToken.set(owner.token, owner as never);
+        GlobalState.sessionsByToken.set(follower.token, follower as never);
+        GlobalState.partyByMember.set('alpha', 198);
+        GlobalState.partyByMember.set('beta', 198);
+
+        const duplicate = {
+            id: 6302,
+            name: canonical.name,
+            isPlayer: false,
+            x: 123,
+            y: 218,
+            v: 0,
+            team: canonical.team,
+            entState: canonical.entState,
+            clientSpawned: true,
+            ownerToken: follower.token,
+            ownerPartyId: 198,
+            roomId: follower.currentRoomId
+        };
+
+        const suppressed = (EntityHandler as any).suppressDuplicateSharedClientSpawn(
+            follower as never,
+            levelName,
+            GlobalState.levelEntities.get(`${levelName}#gr-unsynced`),
+            duplicate
+        );
+
+        const levelMap = GlobalState.levelEntities.get(`${levelName}#gr-unsynced`);
+        assert.equal(suppressed, true, `${levelName} should suppress duplicate hostile spawns before room sync finishes`);
+        assert.equal(levelMap?.size, 1, `${levelName} should keep a single canonical hostile`);
+        assert.deepEqual(
+            follower.sentPackets.map((packet) => packet.id),
+            [0x0D, 0x0F],
+            `${levelName} joiner should destroy its duplicate and adopt the canonical hostile`
+        );
+        assert.equal(parseDestroyEntityId(follower.sentPackets[0]!.payload), 6302);
+        assert.equal(follower.knownEntityIds.has(canonical.id), true);
+        assert.equal(follower.knownEntityIds.has(6302), false);
+    }
+}
+
+function testGoblinRiverDungeonJoinerReplaysStartedRoomEventsFromPartyAnchor(): void {
+    for (const levelName of GOBLIN_RIVER_LEVELS) {
+        const anchor = createFakeClient('Alpha');
+        const joiner = createFakeClient('Beta');
+
+        anchor.currentLevel = levelName;
+        joiner.currentLevel = levelName;
+        anchor.levelInstanceId = 'gr-progress';
+        joiner.levelInstanceId = 'gr-progress';
+        anchor.currentRoomId = 6;
+        joiner.currentRoomId = 0;
+        anchor.syncAnchorStartedAt = 100;
+        joiner.syncAnchorStartedAt = 50;
+        anchor.clientEntID = 7101;
+        joiner.clientEntID = 7102;
+
+        anchor.startedRoomEvents.add(`${levelName}:0`);
+        anchor.startedRoomEvents.add(`${levelName}:3`);
+        anchor.startedRoomEvents.add(`${levelName}:6`);
+        joiner.startedRoomEvents.add(`${levelName}:0`);
+
+        anchor.entities.set(anchor.clientEntID, {
+            id: anchor.clientEntID,
+            name: 'Alpha',
+            isPlayer: true,
+            x: 100,
+            y: 200,
+            team: 1,
+            entState: 0
+        });
+        joiner.entities.set(joiner.clientEntID, {
+            id: joiner.clientEntID,
+            name: 'Beta',
+            isPlayer: true,
+            x: 120,
+            y: 200,
+            team: 1,
+            entState: 0
+        });
+
+        GlobalState.sessionsByToken.set(anchor.token, anchor as never);
+        GlobalState.sessionsByToken.set(joiner.token, joiner as never);
+        GlobalState.partyByMember.set('alpha', 277);
+        GlobalState.partyByMember.set('beta', 277);
+
+        (EntityHandler as any).sendExistingPlayersToJoiner(joiner as never);
+
+        const roomPackets = joiner.sentPackets.filter((packet) => packet.id === 0xA5);
+        assert.deepEqual(
+            roomPackets.map((packet) => parseRoomEventStart(packet.payload)),
+            [
+                { roomId: 3, flag: true },
+                { roomId: 6, flag: true }
+            ],
+            `${levelName} joiner should replay only missing room starts from the anchor`
+        );
+        assert.equal(joiner.currentRoomId, 6, `${levelName} joiner should inherit the anchor room before hostile seeding`);
+        assert.equal(joiner.startedRoomEvents.has(`${levelName}:3`), true);
+        assert.equal(joiner.startedRoomEvents.has(`${levelName}:6`), true);
+    }
+}
+
 function main(): void {
     ensureLevelConfigLoaded();
 
@@ -889,7 +1109,7 @@ function main(): void {
     GlobalState.partyByMember.clear();
 
     try {
-        testOutdoorLevelsUseClientSpawn();
+        testConfiguredLevelsUseClientSpawn();
 
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
@@ -900,6 +1120,16 @@ function main(): void {
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
         testClientSpawnLevelsStartEmptyWithoutServerNpcInit();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testGoblinRiverClientSpawnLevelsPruneServerNpcCopies();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testGoblinRiverClientSpawnLevelsStartEmptyWithoutServerNpcInit();
 
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
@@ -919,12 +1149,22 @@ function main(): void {
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
+        testGoblinRiverDungeonHostileClientSpawnSeedsToPartyPeersOnly();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
         testDungeonPartyAuthoritySuppressesDuplicateHostileSpawns();
 
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
         testDungeonPartyAuthoritySuppressesDuplicateHostileSpawnsAcrossUnsyncedRooms();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testGoblinRiverDungeonPartyAuthoritySuppressesDuplicateHostileSpawnsAcrossUnsyncedRooms();
 
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
@@ -975,6 +1215,11 @@ function main(): void {
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
         testDungeonJoinerReplaysStartedRoomEventsFromPartyAnchor();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testGoblinRiverDungeonJoinerReplaysStartedRoomEventsFromPartyAnchor();
     } finally {
         GlobalState.levelEntities = levelEntities;
         GlobalState.sessionsByToken = sessionsByToken;

@@ -17,6 +17,8 @@ export class EntityHandler {
         'CraftTown',
         'NewbieRoad',
         'NewbieRoadHard',
+        'GoblinRiverDungeon',
+        'GoblinRiverDungeonHard',
         'SwampRoadNorth',
         'SwampRoadNorthHard',
         'SwampRoadConnection',
