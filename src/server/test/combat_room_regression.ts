@@ -684,6 +684,58 @@ async function testFireBrandPiercingShotHitsHomeDummiesWithoutEnemyTeam(): Promi
     );
 }
 
+async function testFireBrandThirdShotDuplicateHitDoesNotDoubleApplyDamage(): Promise<void> {
+    const sender = createFakeClient(220, 'AlphaFireBrandThree', 1);
+    const sameRoomWatcher = createFakeClient(221, 'WatcherFireBrandThree', 1);
+
+    sender.currentLevel = 'TutorialDungeon';
+    sameRoomWatcher.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(sender);
+    attachPlayerEntity(sameRoomWatcher);
+
+    const hostile: any = {
+        id: 5181,
+        name: 'FireBrandThirdTarget',
+        isPlayer: false,
+        x: 260,
+        y: 200,
+        v: 0,
+        team: EntityTeam.ENEMY,
+        entState: EntityState.ACTIVE,
+        roomId: sender.currentRoomId,
+        hp: 100,
+        maxHp: 100
+    };
+    GlobalState.levelEntities.get(getClientLevelScope(sender as never))?.set(hostile.id, hostile);
+
+    GlobalState.sessionsByToken.set(sender.token, sender as never);
+    GlobalState.sessionsByToken.set(sameRoomWatcher.token, sameRoomWatcher as never);
+
+    const duplicatedHit = buildPowerHitPayload(hostile.id, sender.clientEntID, 18, 6144);
+    await CombatHandler.handlePowerHit(sender as never, duplicatedHit);
+
+    assert.equal(hostile.hp, 82, 'the first Flameseer third-shot hit should apply normally');
+    assert.equal(
+        sameRoomWatcher.sentPackets.some((packet) => packet.id === 0x0A && parsePowerHitDamage(packet.payload) === 18),
+        true,
+        'same-room viewers should see the first third-shot hit'
+    );
+
+    sender.sentPackets.length = 0;
+    sameRoomWatcher.sentPackets.length = 0;
+
+    await CombatHandler.handlePowerHit(sender as never, duplicatedHit);
+
+    assert.equal(hostile.hp, 82, 'a duplicate third-shot packet in the same attack window should not apply damage again');
+    assert.equal(sender.sentPackets.some((packet) => packet.id === 0x0A), false);
+    assert.equal(sameRoomWatcher.sentPackets.some((packet) => packet.id === 0x0A), false);
+
+    await CombatHandler.handlePowerHit(sender as never, buildPowerHitPayload(hostile.id, sender.clientEntID, 7, 6145));
+
+    assert.equal(hostile.hp, 75, 'other Firebrand shot ranks should not be blocked by the third-shot dedupe');
+}
+
 async function testPartyEchoedPowerHitDoesNotDoubleApplyDamage(): Promise<void> {
     const sender = createFakeClient(204, 'Alpha', 1);
     const partyOtherRoom = createFakeClient(205, 'Beta', 5);
@@ -1601,6 +1653,15 @@ async function main(): Promise<void> {
         GlobalState.entityLastRewardNonces.clear();
 
         await testFireBrandPiercingShotHitsHomeDummiesWithoutEnemyTeam();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testFireBrandThirdShotDuplicateHitDoesNotDoubleApplyDamage();
 
         GlobalState.sessionsByToken.clear();
         GlobalState.levelEntities.clear();

@@ -85,10 +85,13 @@ type NpcHitResolution = {
 
 export class CombatHandler {
     private static readonly MAX_RELAY_POWER_HIT_DAMAGE = 4_000_000;
+    private static readonly FIREBRAND_THIRD_SHOT_POWER_ID = 6144;
     private static readonly FIREBRAND_PIERCING_SHOT_POWER_ID = 6146;
     private static readonly FIREBRAND_PIERCING_SHOT_RANGE = 800;
     private static readonly FIREBRAND_PIERCING_SHOT_MIN_HIT_RADIUS = 35;
     private static readonly FIREBRAND_PIERCING_HIT_DEDUPE_MS = 1_500;
+    private static readonly FIREBRAND_THIRD_SHOT_HIT_DEDUPE_MS = 300;
+    private static readonly recentFireBrandThirdShotHits = new Map<string, number>();
     private static readonly recentFireBrandPiercingCasts = new Map<string, number>();
 
     private static clampRelayPowerHitDamage(damage: number): number {
@@ -1559,6 +1562,32 @@ export class CombatHandler {
         return true;
     }
 
+    private static getFireBrandThirdShotHitKey(levelScope: string, sourceId: number, targetId: number): string {
+        return `${levelScope}:${sourceId}:${targetId}:${CombatHandler.FIREBRAND_THIRD_SHOT_POWER_ID}`;
+    }
+
+    private static shouldSuppressDuplicateFireBrandThirdShotHit(info: PowerHitRelayInfo, levelScope: string): boolean {
+        if (info.powerId !== CombatHandler.FIREBRAND_THIRD_SHOT_POWER_ID || info.sourceId <= 0 || info.targetId <= 0) {
+            return false;
+        }
+
+        const now = Date.now();
+        const key = CombatHandler.getFireBrandThirdShotHitKey(levelScope, info.sourceId, info.targetId);
+        const lastHitAt = Number(CombatHandler.recentFireBrandThirdShotHits.get(key) ?? 0);
+        if (lastHitAt > 0 && now - lastHitAt <= CombatHandler.FIREBRAND_THIRD_SHOT_HIT_DEDUPE_MS) {
+            CombatHandler.recentFireBrandThirdShotHits.set(key, now);
+            return true;
+        }
+
+        CombatHandler.recentFireBrandThirdShotHits.set(key, now);
+        for (const [hitKey, hitAt] of CombatHandler.recentFireBrandThirdShotHits) {
+            if (now - Number(hitAt) > CombatHandler.FIREBRAND_THIRD_SHOT_HIT_DEDUPE_MS) {
+                CombatHandler.recentFireBrandThirdShotHits.delete(hitKey);
+            }
+        }
+        return false;
+    }
+
     private static resolveFireBrandPiercingShotDamage(sourceSession: Client, sourceEntity: any): number {
         const localSource = sourceSession.clientEntID > 0 ? sourceSession.entities.get(sourceSession.clientEntID) : null;
         const rawDamage = Math.max(
@@ -2227,6 +2256,9 @@ export class CombatHandler {
 
         const sourceSession = CombatHandler.resolveCombatSourceSession(levelScope, sourceId, client);
         if (CombatHandler.shouldSuppressForeignOwnedHit(client, sourceSession, isHostileNpcSource)) {
+            return;
+        }
+        if (CombatHandler.shouldSuppressDuplicateFireBrandThirdShotHit(info, levelScope)) {
             return;
         }
         if (

@@ -21,6 +21,14 @@ const EXPECTED_MOD_VALUES = new Map<string, string>([
   ["Dominate1", "0.15%, 0.3%, 0.45%, 0.75%, 1.2%"],
   ["CurseCrit1", "0.3%, 0.6%, 0.9%, 1.2%, 1.5%"],
 ]);
+const EXPECTED_CHARM_PROC_CHANCE = new Map<string, string>([
+  ["Infernal01", "0.033333333333333"],
+  ["Infernal03", "0.1"],
+  ["Infernal10", "0.333333333333333"],
+  ["TripleFind", "0.266666666666667"],
+  ["DoubleFind2", "0.266666666666667"],
+  ["DoubleFind3", "0.266666666666667"],
+]);
 
 function blockByPattern(xml: string, pattern: RegExp, label: string): string {
   const match = xml.match(pattern);
@@ -41,6 +49,14 @@ function modBlock(xml: string, modName: string): string {
     xml,
     new RegExp(`<PowerModType>\\s*<ModName>${modName}<\\/ModName>[\\s\\S]*?<\\/PowerModType>`),
     modName,
+  );
+}
+
+function charmBlock(xml: string, charmName: string): string {
+  return blockByPattern(
+    xml,
+    new RegExp(`<CharmType\\s+CharmName="${charmName}">[\\s\\S]*?<\\/CharmType>`),
+    charmName,
   );
 }
 
@@ -65,6 +81,16 @@ function assertCritChanceDisplays(playerPowerXml: string, powerModXml: string, l
     const description = tagValue(modBlock(powerModXml, modName), "Description");
     assert(description, `${label}: ${modName} description`);
     assert.equal(descriptionValues(description), values, `${label}: ${modName} visible crit values`);
+  }
+}
+
+function assertCriticalCharmProcValues(charmXml: string, label: string): void {
+  for (const [charmName, expectedValue] of EXPECTED_CHARM_PROC_CHANCE) {
+    assert.equal(
+      tagValue(charmBlock(charmXml, charmName), "ProcChanceUp"),
+      expectedValue,
+      `${label}: ${charmName} stored critical chance multiplier`,
+    );
   }
 }
 
@@ -181,6 +207,7 @@ assertCritChanceDisplays(
   fs.readFileSync(path.join(XML_DIR, "PowerModTypes.xml"), "utf8"),
   "loose XML",
 );
+assertCriticalCharmProcValues(fs.readFileSync(path.join(XML_DIR, "CharmTypes.xml"), "utf8"), "loose XML");
 
 for (const fileName of ["Game.swz", "Game.en.swz", "Game.tr.swz"]) {
   const swzPath = path.join(CBQ_DIR, fileName);
@@ -189,6 +216,7 @@ for (const fileName of ["Game.swz", "Game.en.swz", "Game.tr.swz"]) {
     swzChunk(swzPath, "<PowerModTypes"),
     fileName,
   );
+  assertCriticalCharmProcValues(swzChunk(swzPath, "<CharmTypes"), fileName);
 }
 
 assertScreenArmoryCritChanceStatScale(path.join(CBP_DIR, "DungeonBlitz.swf"));

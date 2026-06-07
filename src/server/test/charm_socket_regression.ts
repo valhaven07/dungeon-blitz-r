@@ -94,6 +94,10 @@ function createAlertPacket(alertMask: number): Buffer {
     return bb.toBuffer();
 }
 
+function assertAlmostEqual(actual: number, expected: number, message: string): void {
+    assert.ok(Math.abs(actual - expected) < 1e-12, `${message}: expected ${expected}, got ${actual}`);
+}
+
 async function withMockedSave<T>(fn: () => Promise<T>): Promise<T> {
     const originalSaveCharacters = JsonAdapter.prototype.saveCharacters;
     JsonAdapter.prototype.saveCharacters = async function(userId: number, characters: any[]): Promise<void> {
@@ -157,8 +161,13 @@ function testCompositeCharmBonusesDecodePrimaryAndSecondaryEffects(): void {
         equippedGears: [{ gearID: 1177, tier: 2, runes: [compositeTrog03WithLegendaryInfernal03, 0, 0], colors: [0, 0] }]
     });
 
-    assert.equal(criticalBonuses.procChanceUp, 0.015, 'legendary secondary Infernal03 critical chance should apply');
+    assertAlmostEqual(criticalBonuses.procChanceUp, 0.1, 'legendary secondary Infernal03 should add a real +1.5% critical chance');
     assert.equal(criticalBonuses.itemFind, 0.03, 'primary Trog03 gear find should still apply with critical secondary');
+
+    const maxCriticalBonuses = getEquippedCharmBonuses({
+        equippedGears: [{ gearID: 1177, tier: 2, runes: [56, 0, 0], colors: [0, 0] }]
+    });
+    assertAlmostEqual(maxCriticalBonuses.procChanceUp, 1 / 3, 'Infernal10 should add a real +5% critical chance');
 }
 
 async function testAlertStatePersistsAndExistingSigilsSuppressRepeatedUnlock(): Promise<void> {
