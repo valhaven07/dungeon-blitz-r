@@ -236,7 +236,7 @@
 	<BuffType BuffName="ReduceArmor">
 		<BuffID>19</BuffID>
 		<Attack>true</Attack>
-		<Duration>5000</Duration>
+		<Duration>3000</Duration>
 		<MagicDefense>-0.2</MagicDefense>
 		<MeleeDefense>-0.2</MeleeDefense>
 		<BuffLoc>Head</BuffLoc>

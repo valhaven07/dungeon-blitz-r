@@ -160,8 +160,8 @@ export function assertMistWalkArmorBreak(powerXml: string, buffXml: string, labe
   if (tagValue(mistBuff, "MagicDefense") !== "-0.2" || tagValue(mistBuff, "MeleeDefense") !== "-0.2") {
     throw new SwzPatchError(`${label}: ${MIST_WALK_ARMOR_BREAK_BUFF} must match Armor Break defense reduction`);
   }
-  if (tagValue(buffBlock(buffXml, BASE_ARMOR_BREAK_BUFF), "Duration") !== "5000") {
-    throw new SwzPatchError(`${label}: global ${BASE_ARMOR_BREAK_BUFF} duration must remain unchanged`);
+  if (tagValue(buffBlock(buffXml, BASE_ARMOR_BREAK_BUFF), "Duration") !== "3000") {
+    throw new SwzPatchError(`${label}: global ${BASE_ARMOR_BREAK_BUFF} duration must be 3000ms`);
   }
 }
 
