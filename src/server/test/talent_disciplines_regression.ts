@@ -234,18 +234,18 @@ async function testEmptyAllocateDoesNotClearSavedTalentTree(): Promise<void> {
     );
 }
 
-async function testInstantResearchRequiresClaimLikePython(): Promise<void> {
+async function testInstantResearchPersistsImmediatelyAndClaimIsIdempotent(): Promise<void> {
     const client = createClient();
-    const beforeStart = Math.floor(Date.now() / 1000);
 
     await withMockedCharacterSave(async () => {
         await TalentHandler.handleTrainTalentPoint(client as never, createTrainPacket(2, true));
     });
 
-    const research = client.character.talentResearch as Record<string, unknown>;
-    assert.equal(client.character.talentPoints?.['2'] ?? 0, 0, 'instant research should not auto-grant a point');
-    assert.equal(Number(research.classIndex ?? -1), 2);
-    assert.ok(Number(research.ReadyTime ?? 0) >= beforeStart);
+    assert.equal(client.character.talentPoints?.['2'], 1, 'instant research should persist the point without waiting for client claim');
+    assert.deepEqual(client.character.talentResearch, {
+        classIndex: null,
+        ReadyTime: 0
+    });
     assert.equal(client.sentPackets.some((packet) => packet.id === 0xB5), true, 'instant idol purchase should refresh premium UI');
     assert.equal(client.sentPackets.some((packet) => packet.id === 0xD5), true, 'instant research should still notify completion');
 
@@ -253,7 +253,7 @@ async function testInstantResearchRequiresClaimLikePython(): Promise<void> {
         await TalentHandler.handleTalentClaim(client as never, Buffer.alloc(0));
     });
 
-    assert.equal(client.character.talentPoints?.['2'], 1);
+    assert.equal(client.character.talentPoints?.['2'], 1, 'late client claim should not grant a duplicate point');
     assert.deepEqual(client.character.talentResearch, {
         classIndex: null,
         ReadyTime: 0
@@ -263,7 +263,6 @@ async function testInstantResearchRequiresClaimLikePython(): Promise<void> {
 async function testGoldResearchCompletesWithoutTimer(): Promise<void> {
     const client = createClient();
     const originalSetTimeout = global.setTimeout;
-    const beforeStart = Math.floor(Date.now() / 1000);
     let timerArmed = false;
 
     (global as typeof globalThis & { setTimeout: typeof setTimeout }).setTimeout = ((callback: (...args: any[]) => void, delay?: number) => {
@@ -278,9 +277,11 @@ async function testGoldResearchCompletesWithoutTimer(): Promise<void> {
             await TalentHandler.handleTrainTalentPoint(client as never, createTrainPacket(2, false));
         });
 
-        const research = client.character.talentResearch as Record<string, unknown>;
-        assert.equal(Number(research.classIndex ?? -1), 2);
-        assert.ok(Number(research.ReadyTime ?? 0) >= beforeStart);
+        assert.equal(client.character.talentPoints?.['2'], 1, 'gold talent research should persist the point immediately');
+        assert.deepEqual(client.character.talentResearch, {
+            classIndex: null,
+            ReadyTime: 0
+        });
         assert.equal(timerArmed, false, 'gold talent research should not arm a completion timer');
         assert.equal(
             client.sentPackets.some((packet) => packet.id === 0xD5),
@@ -446,7 +447,7 @@ async function main(): Promise<void> {
     await testRespecUsesPythonNodeMapping();
     await testAllocateTalentTreePreservesHighNodeTypeIdsAndClampsByStorageSlot();
     await testEmptyAllocateDoesNotClearSavedTalentTree();
-    await testInstantResearchRequiresClaimLikePython();
+    await testInstantResearchPersistsImmediatelyAndClaimIsIdempotent();
     await testGoldResearchCompletesWithoutTimer();
     testEntityBuildsTalentsFromTalentTree();
     testEntityTalentSlotsKeepClientSlotPositions();

@@ -6,7 +6,7 @@ const { execFileSync } = require('child_process');
 
 const DEFAULT_SWF = path.join('src', 'client', 'content', 'localhost', 'p', 'cbp', 'DungeonBlitz.swf');
 const TALENT_TIMES_ZERO = `[${Array.from({ length: 51 }, () => 0).join(',')}]`;
-const SELECTED_CLASSES = ['class_66', 'class_69'];
+const SELECTED_CLASSES = ['class_66', 'class_69', 'LinkUpdater'];
 
 function parseArgs(argv) {
     const args = {
@@ -31,7 +31,8 @@ function parseArgs(argv) {
                 'Patches DungeonBlitz.swf Talent Point timers:',
                 '  class_66.const_527 training times => all zero',
                 '  class_69 Train Talent Point UI => hide timer display',
-                '  class_69 TrainTalentPoint => do not create local timed research'
+                '  class_69 TrainTalentPoint => create completed local research without a timer',
+                '  LinkUpdater Talent Point completion => retain the completed discipline index'
             ].join('\n'));
             process.exit(0);
         } else {
@@ -133,15 +134,33 @@ function patchClass69(source) {
     );
     patched = patched.replace(
         '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,_loc12_);',
-        '               _loc12_ = 0;'
+        '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);'
+    );
+    patched = patched.replace(
+        '               _loc12_ = 0;',
+        '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);'
     );
 
     return patched;
 }
 
+function patchLinkUpdater(source) {
+    return source.replace(
+        /         if\(this\.var_1\.mMasterClassTower\)\r?\n         \{\r?\n            this\.var_1\.mMasterClassTower\.mStatus = class_66\.const_534;\r?\n            this\.var_1\.mMasterClassTower\.method_469\(\);\r?\n         \}/,
+        [
+            '         if(this.var_1.mMasterClassTower)',
+            '         {',
+            '            this.var_1.mMasterClassTower.SetCurrentResearch(_loc2_,0);',
+            '            this.var_1.mMasterClassTower.method_469();',
+            '         }'
+        ].join('\n')
+    );
+}
+
 function verifySources(scriptsRoot) {
     const class66 = fs.readFileSync(path.join(scriptsRoot, 'class_66.as'), 'utf8');
     const class69 = fs.readFileSync(path.join(scriptsRoot, 'class_69.as'), 'utf8');
+    const linkUpdater = fs.readFileSync(path.join(scriptsRoot, 'LinkUpdater.as'), 'utf8');
 
     if (!class66.includes(`internal static const const_527:Array = ${TALENT_TIMES_ZERO};`)) {
         throw new Error('class_66.const_527 is not patched to zero Talent Point training times');
@@ -158,6 +177,18 @@ function verifySources(scriptsRoot) {
     if (class69.includes('var_1.mMasterClassTower.SetCurrentResearch(_loc6_,_loc12_);')) {
         throw new Error('class_69 still creates local timed Talent Point research');
     }
+    if (!class69.includes('var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);')) {
+        throw new Error('class_69 does not retain the completed Talent Point research index');
+    }
+    if (class69.includes('_loc12_ = 0;')) {
+        throw new Error('class_69 clears the local research timer without retaining the research index');
+    }
+    if (!linkUpdater.includes('this.var_1.mMasterClassTower.SetCurrentResearch(_loc2_,0);')) {
+        throw new Error('LinkUpdater does not retain the completed Talent Point research index');
+    }
+    if (linkUpdater.includes('this.var_1.mMasterClassTower.mStatus = class_66.const_534;')) {
+        throw new Error('LinkUpdater still marks Talent Point completion without setting the research index');
+    }
 }
 
 function patchSwf(repoRoot, ffdecPath, swfPath) {
@@ -165,9 +196,11 @@ function patchSwf(repoRoot, ffdecPath, swfPath) {
     const scriptsRoot = exportScripts(repoRoot, ffdecPath, workRoot, swfPath);
     const class66Path = path.join(scriptsRoot, 'class_66.as');
     const class69Path = path.join(scriptsRoot, 'class_69.as');
+    const linkUpdaterPath = path.join(scriptsRoot, 'LinkUpdater.as');
 
     fs.writeFileSync(class66Path, patchClass66(fs.readFileSync(class66Path, 'utf8')), 'utf8');
     fs.writeFileSync(class69Path, patchClass69(fs.readFileSync(class69Path, 'utf8')), 'utf8');
+    fs.writeFileSync(linkUpdaterPath, patchLinkUpdater(fs.readFileSync(linkUpdaterPath, 'utf8')), 'utf8');
     verifySources(scriptsRoot);
 
     const patchedSwfPath = `${swfPath}.patched`;
