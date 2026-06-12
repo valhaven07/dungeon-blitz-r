@@ -1149,7 +1149,8 @@ export class LevelHandler {
         const requiredKills = Math.max(1, getSharedDungeonProgressTotals(levelScope).total);
         MissionHandler.scheduleDungeonCompletion(
             authorityClient,
-            LevelHandler.buildSharedDungeonAutoCompletePayload(requiredKills)
+            LevelHandler.buildSharedDungeonAutoCompletePayload(requiredKills),
+            MissionHandler.getSharedDungeonAutoCompleteScheduleOptions(authorityClient, levelScope)
         );
         const refreshDelay = MissionHandler.DUNGEON_COMPLETION_SKIT_SETTLE_MS + 50;
         setTimeout(() => {

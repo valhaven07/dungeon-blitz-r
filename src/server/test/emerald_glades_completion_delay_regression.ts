@@ -163,8 +163,50 @@ function createDefeatedBoss(testCase: MissionCase, index: number): any {
     };
 }
 
+function createLevelCompletePacket(): Buffer {
+    const bb = new BitBuffer(false);
+    bb.writeMethod9(100);
+    bb.writeMethod9(5000);
+    bb.writeMethod9(100);
+    bb.writeMethod9(0);
+    bb.writeMethod9(0);
+    bb.writeMethod9(0);
+    bb.writeMethod9(1);
+    bb.writeMethod9(10);
+    return bb.toBuffer();
+}
+
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function testClientReportedCompletionBeforeEmeraldBossDefeatIsIgnored(): Promise<void> {
+    for (let index = 0; index < MISSION_CASES.length; index += 1) {
+        const testCase = MISSION_CASES[index];
+        const client = createClient(testCase, index + 100);
+        const levelScope = `${client.currentLevel}#${client.levelInstanceId}`;
+
+        GlobalState.sessionsByToken.set(client.token, client as never);
+        GlobalState.levelEntities.set(levelScope, new Map<number, any>());
+
+        await MissionHandler.handleSetLevelComplete(client as never, createLevelCompletePacket());
+
+        assert.equal(
+            client.sentPackets.some((packet) => packet.id === 0x87),
+            false,
+            `${testCase.level} should ignore client-reported completion before the boss is defeated`
+        );
+        assert.equal(
+            Number(client.character.missions[String(testCase.missionId)]?.state ?? 0),
+            1,
+            `${testCase.level} should keep its mission in progress before the boss is defeated`
+        );
+        assert.equal(
+            Number(client.character.questTrackerState ?? 0),
+            0,
+            `${testCase.level} should not move quest progress to 100 before the boss is defeated`
+        );
+    }
 }
 
 async function main(): Promise<void> {
@@ -179,6 +221,8 @@ async function main(): Promise<void> {
         GlobalState.sessionsByToken.clear();
         GlobalState.levelEntities.clear();
         GlobalState.levelQuestProgress.clear();
+
+        await testClientReportedCompletionBeforeEmeraldBossDefeatIsIgnored();
 
         for (let index = 0; index < MISSION_CASES.length; index += 1) {
             const testCase = MISSION_CASES[index];

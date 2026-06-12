@@ -697,6 +697,17 @@ export class GameData {
         return Boolean(dungeonKey && bossKey && GameData.DUNGEON_BOSS_ENTITY_KEYS_BY_LEVEL[dungeonKey]?.has(bossKey));
     }
 
+    static hasDungeonBossEntities(levelName: string | null | undefined): boolean {
+        const normalizedLevel = LevelConfig.normalizeLevelName(levelName);
+        const levelKnown = Boolean(normalizedLevel && LevelConfig.has(normalizedLevel));
+        if (levelKnown && !LevelConfig.isDungeonLevel(normalizedLevel)) {
+            return false;
+        }
+
+        const dungeonKey = GameData.normalizeDungeonLevelKey(normalizedLevel || levelName);
+        return Boolean(dungeonKey && GameData.DUNGEON_BOSS_ENTITY_KEYS_BY_LEVEL[dungeonKey]?.size);
+    }
+
     static isBossEntity(entity: any): boolean {
         const entityName = String(entity?.name ?? entity?.EntName ?? entity?.entName ?? '').trim();
         const rank = GameData.getEntityRank(entity);
