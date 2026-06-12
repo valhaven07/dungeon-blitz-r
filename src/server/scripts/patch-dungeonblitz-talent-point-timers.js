@@ -31,7 +31,7 @@ function parseArgs(argv) {
                 'Patches DungeonBlitz.swf Talent Point timers:',
                 '  class_66.const_527 training times => all zero',
                 '  class_69 Train Talent Point UI => hide timer display',
-                '  class_69 TrainTalentPoint => create completed local research without a timer',
+                '  class_69 TrainTalentPoint => wait for server completion before granting locally',
                 '  LinkUpdater Talent Point completion => retain the completed discipline index'
             ].join('\n'));
             process.exit(0);
@@ -134,11 +134,11 @@ function patchClass69(source) {
     );
     patched = patched.replace(
         '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,_loc12_);',
-        '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);'
+        '               _loc12_ = 0;'
     );
     patched = patched.replace(
-        '               _loc12_ = 0;',
-        '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);'
+        '               var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);',
+        '               _loc12_ = 0;'
     );
 
     return patched;
@@ -177,11 +177,11 @@ function verifySources(scriptsRoot) {
     if (class69.includes('var_1.mMasterClassTower.SetCurrentResearch(_loc6_,_loc12_);')) {
         throw new Error('class_69 still creates local timed Talent Point research');
     }
-    if (!class69.includes('var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);')) {
-        throw new Error('class_69 does not retain the completed Talent Point research index');
+    if (class69.includes('var_1.mMasterClassTower.SetCurrentResearch(_loc6_,0);')) {
+        throw new Error('class_69 grants a local Talent Point before the server completion packet');
     }
-    if (class69.includes('_loc12_ = 0;')) {
-        throw new Error('class_69 clears the local research timer without retaining the research index');
+    if (!class69.includes('_loc12_ = 0;')) {
+        throw new Error('class_69 does not suppress local Talent Point research before server completion');
     }
     if (!linkUpdater.includes('this.var_1.mMasterClassTower.SetCurrentResearch(_loc2_,0);')) {
         throw new Error('LinkUpdater does not retain the completed Talent Point research index');
