@@ -141,6 +141,13 @@ const QUEST_LOCKED_DUNGEON_DOOR_CASES: QuestLockedDungeonDoorCase[] = [
         doorId: 102,
         missionId: MissionID.SlayYornak,
         dungeonTarget: 'SRN_Mission2'
+    },
+    {
+        label: 'Dereliction of Duty',
+        currentLevel: 'BridgeTown',
+        doorId: 104,
+        missionId: MissionID.DerelictionOfDuty,
+        dungeonTarget: 'BT_Mission4'
     }
 ];
 
