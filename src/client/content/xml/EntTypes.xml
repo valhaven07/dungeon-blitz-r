@@ -50253,7 +50253,7 @@
 		<DisplayName>Iblis Reaper</DisplayName>
 		<DevStatus>Valhaven</DevStatus>
 		<MeleePower>BruteMelee1</MeleePower>
-		<RangedPower>BruteShot2</RangedPower>
+		<RangedPower>BruteShot</RangedPower>
 		<Powers>BruteHeavy</Powers>
 		<Level>30</Level>
 		<GroupLevel>29</GroupLevel>
@@ -50807,7 +50807,7 @@
 		<DisplayName>Iblis Reaper zor</DisplayName>
 		<DevStatus>Valhaven</DevStatus>
 		<MeleePower>BruteMelee1</MeleePower>
-		<RangedPower>BruteShot2</RangedPower>
+		<RangedPower>BruteShot</RangedPower>
 		<Powers>BruteHeavy</Powers>
 		<Level>30</Level>
 		<GroupLevel>29</GroupLevel>
