@@ -3,7 +3,7 @@ import * as path from 'path';
 import { createKeepTutorialState } from '../core/Client';
 import { GlobalState } from '../core/GlobalState';
 import { LevelConfig } from '../core/LevelConfig';
-import { Entity } from '../core/Entity';
+import { Entity, EntityState } from '../core/Entity';
 import { CombatHandler } from '../handlers/CombatHandler';
 import { EntityHandler } from '../handlers/EntityHandler';
 import { LevelHandler } from '../handlers/LevelHandler';
@@ -99,6 +99,27 @@ function createFakeClient(name: string, level: number = 1): FakeClient {
 function parseDestroyEntityId(payload: Buffer): number {
     const br = new BitReader(payload);
     return br.readMethod4();
+}
+
+function parseHpDelta(payload: Buffer): { entityId: number; delta: number } {
+    const br = new BitReader(payload);
+    return {
+        entityId: br.readMethod4(),
+        delta: br.readMethod45()
+    };
+}
+
+function parseEntityStatePayload(payload: Buffer): { entityId: number; entState: number } {
+    const br = new BitReader(payload);
+    return {
+        entityId: br.readMethod4(),
+        entState: (() => {
+            br.readMethod45();
+            br.readMethod45();
+            br.readMethod45();
+            return br.readMethod6(2);
+        })()
+    };
 }
 
 function buildDestroyEntityPayload(entityId: number): Buffer {
@@ -622,6 +643,223 @@ function testDungeonPartyAuthoritySuppressesDuplicateHostileSpawns(): void {
     assert.equal(follower.knownEntityIds.has(3301), false);
     assert.equal(follower.entities.get(3301)?.sharedCanonicalId, canonical.id);
     assert.equal(follower.entityIdAliases.get(3301), canonical.id);
+}
+
+function testDungeonPartyAuthoritySuppressesDuplicateDeadHostileSpawns(): void {
+    const owner = createFakeClient('Alpha');
+    const follower = createFakeClient('Beta');
+
+    owner.currentLevel = 'TutorialDungeon';
+    follower.currentLevel = 'TutorialDungeon';
+    owner.currentRoomId = 4;
+    follower.currentRoomId = 4;
+
+    const canonical = {
+        id: 2309,
+        name: 'IntroGoblin',
+        isPlayer: false,
+        x: 120,
+        y: 220,
+        v: 0,
+        team: 2,
+        entState: EntityState.DEAD,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 97,
+        roomId: owner.currentRoomId,
+        hp: 0,
+        maxHp: 100,
+        healthDelta: -100,
+        health_delta: -100,
+        dead: true
+    };
+
+    GlobalState.levelEntities.set('TutorialDungeon', new Map([[canonical.id, canonical]]));
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(follower.token, follower as never);
+    GlobalState.partyByMember.set('alpha', 97);
+    GlobalState.partyByMember.set('beta', 97);
+
+    const duplicate = {
+        id: 3309,
+        name: canonical.name,
+        isPlayer: false,
+        x: 123,
+        y: 218,
+        v: 0,
+        team: canonical.team,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: follower.token,
+        ownerPartyId: 97,
+        roomId: follower.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        healthDelta: 0,
+        health_delta: 0,
+        dead: false
+    };
+
+    const suppressed = (EntityHandler as any).suppressDuplicateSharedClientSpawn(
+        follower as never,
+        'TutorialDungeon',
+        GlobalState.levelEntities.get('TutorialDungeon'),
+        duplicate
+    );
+
+    const packets = follower.sentPackets;
+    assert.equal(suppressed, true, 'follower live hostile spawn should be suppressed when canonical party hostile is dead');
+    assert.deepEqual(packets.map((packet) => packet.id), [0x78, 0x07, 0x0D]);
+    assert.deepEqual(parseHpDelta(packets[0].payload), { entityId: duplicate.id, delta: -100 });
+    assert.deepEqual(parseEntityStatePayload(packets[1].payload), { entityId: duplicate.id, entState: EntityState.DEAD });
+    assert.equal(parseDestroyEntityId(packets[2].payload), duplicate.id);
+    assert.equal(follower.knownEntityIds.has(canonical.id), true);
+    assert.equal(follower.knownEntityIds.has(duplicate.id), false);
+    assert.equal(follower.entities.has(duplicate.id), false, 'dead duplicate local proxy must not remain cached as alive');
+    assert.equal(follower.entityIdAliases.get(duplicate.id), canonical.id);
+}
+
+function testDungeonPartyAuthoritySyncsDamagedLiveHostileSpawn(): void {
+    const owner = createFakeClient('Alpha');
+    const follower = createFakeClient('Beta');
+
+    owner.currentLevel = 'TutorialDungeon';
+    follower.currentLevel = 'TutorialDungeon';
+    owner.currentRoomId = 4;
+    follower.currentRoomId = 4;
+
+    const canonical = {
+        id: 2319,
+        name: 'IntroGoblin',
+        isPlayer: false,
+        x: 120,
+        y: 220,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 107,
+        roomId: owner.currentRoomId,
+        hp: 40,
+        maxHp: 100,
+        healthDelta: -60,
+        health_delta: -60,
+        dead: false,
+        combatAuthorityToken: owner.token,
+        firstCombatAuthorityToken: owner.token,
+        combatAuthorityName: owner.character.name,
+        firstCombatAuthorityName: owner.character.name,
+        combatAuthorityStartedAt: 1234,
+        firstCombatAuthorityStartedAt: 1234
+    };
+
+    GlobalState.levelEntities.set('TutorialDungeon', new Map([[canonical.id, canonical]]));
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(follower.token, follower as never);
+    GlobalState.partyByMember.set('alpha', 107);
+    GlobalState.partyByMember.set('beta', 107);
+
+    const duplicate = {
+        id: 3319,
+        name: canonical.name,
+        isPlayer: false,
+        x: 123,
+        y: 218,
+        v: 0,
+        team: canonical.team,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: follower.token,
+        ownerPartyId: 107,
+        roomId: follower.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        healthDelta: 0,
+        health_delta: 0,
+        dead: false
+    };
+
+    const suppressed = (EntityHandler as any).suppressDuplicateSharedClientSpawn(
+        follower as never,
+        'TutorialDungeon',
+        GlobalState.levelEntities.get('TutorialDungeon'),
+        duplicate
+    );
+
+    const localEntity = follower.entities.get(duplicate.id);
+    assert.equal(suppressed, true, 'damaged live canonical should suppress duplicate local hostile spawn');
+    assert.deepEqual(follower.sentPackets.map((packet) => packet.id), [0x78]);
+    assert.deepEqual(parseHpDelta(follower.sentPackets[0].payload), { entityId: duplicate.id, delta: -60 });
+    assert.equal(localEntity?.hp, canonical.hp);
+    assert.equal(localEntity?.maxHp, canonical.maxHp);
+    assert.equal(localEntity?.healthDelta, canonical.healthDelta);
+    assert.equal(localEntity?.combatAuthorityToken, owner.token);
+    assert.equal(follower.entityIdAliases.get(duplicate.id), canonical.id);
+}
+
+function testDungeonPartyAuthorityCleansSameIdDeadHostileSpawn(): void {
+    const owner = createFakeClient('Alpha');
+    const follower = createFakeClient('Beta');
+
+    owner.currentLevel = 'TutorialDungeon';
+    follower.currentLevel = 'TutorialDungeon';
+    owner.currentRoomId = 4;
+    follower.currentRoomId = 4;
+
+    const canonical = {
+        id: 2310,
+        name: 'IntroGoblin',
+        isPlayer: false,
+        x: 120,
+        y: 220,
+        v: 0,
+        team: 2,
+        entState: EntityState.DEAD,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 99,
+        roomId: owner.currentRoomId,
+        hp: 0,
+        maxHp: 100,
+        healthDelta: -100,
+        health_delta: -100,
+        dead: true
+    };
+
+    GlobalState.levelEntities.set('TutorialDungeon', new Map([[canonical.id, canonical]]));
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(follower.token, follower as never);
+    GlobalState.partyByMember.set('alpha', 99);
+    GlobalState.partyByMember.set('beta', 99);
+
+    const sameIdLocalSpawn = {
+        ...canonical,
+        ownerToken: follower.token,
+        ownerPartyId: 99,
+        entState: EntityState.ACTIVE,
+        hp: 100,
+        maxHp: 100,
+        healthDelta: 0,
+        health_delta: 0,
+        dead: false
+    };
+
+    const suppressed = (EntityHandler as any).suppressDuplicateSharedClientSpawn(
+        follower as never,
+        'TutorialDungeon',
+        GlobalState.levelEntities.get('TutorialDungeon'),
+        sameIdLocalSpawn
+    );
+
+    const packets = follower.sentPackets;
+    assert.equal(suppressed, true, 'same-id local hostile spawn should still be cleaned up when canonical is dead');
+    assert.deepEqual(packets.map((packet) => packet.id), [0x78, 0x07, 0x0D]);
+    assert.deepEqual(parseHpDelta(packets[0].payload), { entityId: canonical.id, delta: -100 });
+    assert.deepEqual(parseEntityStatePayload(packets[1].payload), { entityId: canonical.id, entState: EntityState.DEAD });
+    assert.equal(parseDestroyEntityId(packets[2].payload), canonical.id);
+    assert.equal(follower.knownEntityIds.has(canonical.id), true);
+    assert.equal(follower.entities.has(canonical.id), false);
 }
 
 function testDungeonHostileSpawnBroadcastWaitsForJoinerCanonicalAdoption(): void {
@@ -2065,7 +2303,18 @@ function buildIncrementalUpdatePayload(entityId: number, deltaX: number, deltaY:
     return bb.toBuffer();
 }
 
-async function testSharedDungeonIncrementalUpdateSkipsAliasedViewerMovement(): Promise<void> {
+function parseIncrementalUpdatePayload(payload: Buffer): { entityId: number; deltaX: number; deltaY: number; deltaVX: number; entState: number } {
+    const br = new BitReader(payload);
+    return {
+        entityId: br.readMethod4(),
+        deltaX: br.readMethod45(),
+        deltaY: br.readMethod45(),
+        deltaVX: br.readMethod45(),
+        entState: br.readMethod6(2)
+    };
+}
+
+async function testSharedDungeonIncrementalUpdateRelaysToReadyAliasedViewerMovement(): Promise<void> {
     const owner = createFakeClient('Alpha');
     const joiner = createFakeClient('Beta');
 
@@ -2106,10 +2355,84 @@ async function testSharedDungeonIncrementalUpdateSkipsAliasedViewerMovement(): P
         buildIncrementalUpdatePayload(canonical.id, 8, -2, 0)
     );
 
+    const relayedMove = joiner.sentPackets.find((packet) => packet.id === 0x07);
+    assert.ok(relayedMove, 'ready shared client-spawn hostile movement should relay to the party joiner');
+    assert.deepEqual(
+        parseIncrementalUpdatePayload(relayedMove!.payload),
+        { entityId: 9101, deltaX: 8, deltaY: -2, deltaVX: 0, entState: 0 },
+        'shared client-spawn hostile movement should use the joiner local enemy id'
+    );
+}
+
+async function testSharedDungeonIncrementalUpdateUsesCombatAuthority(): Promise<void> {
+    const owner = createFakeClient('Alpha');
+    const authority = createFakeClient('Beta');
+
+    owner.currentLevel = 'TutorialDungeon';
+    authority.currentLevel = 'TutorialDungeon';
+    owner.currentRoomId = 4;
+    authority.currentRoomId = 4;
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(authority.token, authority as never);
+    GlobalState.partyByMember.set('alpha', 303);
+    GlobalState.partyByMember.set('beta', 303);
+
+    const canonical = {
+        id: 8103,
+        name: 'IntroGoblin',
+        isPlayer: false,
+        x: 120,
+        y: 220,
+        v: 0,
+        team: 2,
+        entState: 0,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 303,
+        combatAuthorityToken: authority.token,
+        firstCombatAuthorityToken: authority.token,
+        roomId: owner.currentRoomId
+    };
+    const authorityLocalId = 9103;
+
+    GlobalState.levelEntities.set('TutorialDungeon', new Map([[canonical.id, canonical]]));
+    owner.entities.set(canonical.id, { ...canonical });
+    owner.knownEntityIds.add(canonical.id);
+    authority.entityIdAliases.set(authorityLocalId, canonical.id);
+    authority.knownEntityIds.add(canonical.id);
+    authority.entities.set(authorityLocalId, {
+        ...canonical,
+        id: authorityLocalId,
+        x: 150,
+        y: 215,
+        sharedCanonicalId: canonical.id
+    });
+
+    await LevelHandler.handleEntityIncrementalUpdate(
+        owner as never,
+        buildIncrementalUpdatePayload(canonical.id, 99, 0, 0)
+    );
+
+    assert.equal(canonical.x, 120, 'non-authority owner movement should not mutate canonical shared hostile position');
     assert.equal(
-        joiner.sentPackets.some((packet) => packet.id === 0x07),
+        authority.sentPackets.some((packet) => packet.id === 0x07),
         false,
-        'shared client-spawn hostile movement should stay local to avoid joiner LinkUpdater crashes'
+        'non-authority owner movement should not relay over first attacker movement'
+    );
+
+    await LevelHandler.handleEntityIncrementalUpdate(
+        authority as never,
+        buildIncrementalUpdatePayload(authorityLocalId, 8, -2, 0)
+    );
+
+    assert.equal(canonical.x, 158, 'combat authority local movement should drive canonical shared hostile position');
+    const relayedMove = owner.sentPackets.find((packet) => packet.id === 0x07);
+    assert.ok(relayedMove, 'combat authority shared hostile movement should relay to the owner');
+    assert.deepEqual(
+        parseIncrementalUpdatePayload(relayedMove!.payload),
+        { entityId: canonical.id, deltaX: 38, deltaY: -7, deltaVX: 0, entState: 0 },
+        'combat authority movement should converge the viewer to the authority absolute hostile position'
     );
 }
 
@@ -2189,10 +2512,12 @@ async function testHiddenAliasedHostileNeverReceivesRemoteMovement(): Promise<vo
         buildIncrementalUpdatePayload(canonical.id, 6, -1, 0)
     );
 
-    assert.equal(
-        joiner.sentPackets.some((packet) => packet.id === 0x07),
-        false,
-        'shared client-spawn hostile movement should remain client-local even after local alias readiness'
+    const relayedMove = joiner.sentPackets.find((packet) => packet.id === 0x07);
+    assert.ok(relayedMove, 'shared client-spawn hostile movement should relay after local alias readiness');
+    assert.deepEqual(
+        parseIncrementalUpdatePayload(relayedMove!.payload),
+        { entityId: localDuplicate.id, deltaX: 6, deltaY: -1, deltaVX: 0, entState: 0 },
+        'post-readiness shared hostile movement should use the joiner local enemy id'
     );
 }
 
@@ -2923,6 +3248,21 @@ async function main(): Promise<void> {
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
+        testDungeonPartyAuthoritySuppressesDuplicateDeadHostileSpawns();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testDungeonPartyAuthoritySyncsDamagedLiveHostileSpawn();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        testDungeonPartyAuthorityCleansSameIdDeadHostileSpawn();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
         testDungeonHostileSpawnBroadcastWaitsForJoinerCanonicalAdoption();
 
         GlobalState.levelEntities.clear();
@@ -3090,7 +3430,12 @@ async function main(): Promise<void> {
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();
         GlobalState.partyByMember.clear();
-        await testSharedDungeonIncrementalUpdateSkipsAliasedViewerMovement();
+        await testSharedDungeonIncrementalUpdateRelaysToReadyAliasedViewerMovement();
+
+        GlobalState.levelEntities.clear();
+        GlobalState.sessionsByToken.clear();
+        GlobalState.partyByMember.clear();
+        await testSharedDungeonIncrementalUpdateUsesCombatAuthority();
 
         GlobalState.levelEntities.clear();
         GlobalState.sessionsByToken.clear();

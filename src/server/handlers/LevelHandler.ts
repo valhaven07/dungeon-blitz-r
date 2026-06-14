@@ -35,6 +35,7 @@ import { normalizeCharacterKey, PendingTeleport } from '../core/SocialState';
 import { TransferTokenAllocator } from '../core/TransferTokenAllocator';
 import { areClientsInSameParty, getPartyIdForClient, sharesRoomIds } from '../core/PartySync';
 import { syncPotionReservationForLevelTransition } from '../utils/ConsumableState';
+import { logJcMini1Authority } from '../utils/JcMini1AuthorityLog';
 import {
     getSharedDungeonInitialProgress,
     getOrCreateSharedDungeonProgressState,
@@ -4290,9 +4291,20 @@ export class LevelHandler {
             ? LevelHandler.resolveVisitedCraftTownOwnerToken(newToken, hostChar)
             : undefined;
         const momentParams = DungeonEntryDisplay.buildMomentParams(targetLevel, isHard ? "Hard" : "");
+        const pendingTransferEntry = GlobalState.pendingWorld.get(newToken);
+        const pendingSyncAnchorToken = Number(
+            pendingTransferEntry?.syncAnchorToken ??
+            syncState?.syncAnchorToken ??
+            0
+        );
+        const enterWorldTransferToken = LevelConfig.isDungeonLevel(targetLevel) &&
+            Number.isFinite(pendingSyncAnchorToken) &&
+            pendingSyncAnchorToken > 0
+            ? Math.round(pendingSyncAnchorToken)
+            : newToken;
         
         const pkt = WorldEnter.buildEnterWorldPacket(
-            newToken,
+            enterWorldTransferToken,
             0,
             oldLevelSpec.swf,
             hasOldCoord,
@@ -4317,7 +4329,9 @@ export class LevelHandler {
             previousSwf: oldLevelSpec.swf,
             targetLevel,
             targetSwf: levelSpec.swf,
-            transferToken: newToken,
+            transferToken: enterWorldTransferToken,
+            allocatedTransferToken: newToken,
+            syncAnchorToken: pendingSyncAnchorToken > 0 ? Math.round(pendingSyncAnchorToken) : undefined,
             packetToken,
             effectivePreviousLevel,
             newHasCoord,
@@ -4396,17 +4410,230 @@ export class LevelHandler {
             EntityHandler.isClientOwnPlayerEntity(client, getClientLevelScope(client), entityId, ent) ||
             EntityHandler.isClientOwnPlayerEntity(client, getClientLevelScope(client), rawEntityId, ent);
         const currentLevel = client.currentLevel || "NewbieRoad";
+        const isServerAuthorityProxyUpdate =
+            rawEntityId !== entityId &&
+            EntityHandler.isServerAuthorityHostileEntity(currentLevel, levelEntity);
+        if (isServerAuthorityProxyUpdate) {
+            EntityHandler.markSharedEntityRemoteUpdatesReady(client, entityId);
+            const canonicalDead = Boolean(levelEntity?.dead) ||
+                Number(levelEntity?.entState ?? EntityState.ACTIVE) === EntityState.DEAD ||
+                Math.round(Number(levelEntity?.hp ?? 1)) <= 0;
+            if (canonicalDead) {
+                const previousLocalHpValue = Number(ent?.hp ?? NaN);
+                const previousLocalHp = Number.isFinite(previousLocalHpValue)
+                    ? Math.max(0, Math.round(previousLocalHpValue))
+                    : 0;
+                const correctionMaxHp = Math.max(0, Math.round(Number(levelEntity?.maxHp ?? ent?.maxHp ?? 0)));
+                if (previousLocalHp > 0) {
+                    const hpCorrection = new BitBuffer(false);
+                    hpCorrection.writeMethod4(rawEntityId);
+                    hpCorrection.writeMethod45(-previousLocalHp);
+                    client.sendBitBuffer(0x78, hpCorrection);
+                    logJcMini1Authority('authoritative_hp_correction', {
+                        packetId: '0x78',
+                        reason: 'dead_proxy_active_state_rejected',
+                        entityId,
+                        localEntityId: rawEntityId,
+                        viewer: client.character?.name ?? '',
+                        viewerToken: client.token,
+                        scope: getClientLevelScope(client),
+                        previousHp: previousLocalHp,
+                        expectedDamage: 0,
+                        expectedPostPacketHp: previousLocalHp,
+                        canonicalHp: 0,
+                        maxHp: correctionMaxHp,
+                        delta: -previousLocalHp,
+                        dead: true,
+                        entState: EntityState.DEAD
+                    });
+                }
+                if (levelEntity && typeof levelEntity === 'object') {
+                    levelEntity.hp = 0;
+                    levelEntity.dead = true;
+                    levelEntity.entState = EntityState.DEAD;
+                    const maxHp = Math.max(0, Math.round(Number(levelEntity.maxHp ?? 0)));
+                    if (maxHp > 0) {
+                        levelEntity.healthDelta = -maxHp;
+                        levelEntity.health_delta = -maxHp;
+                    }
+                }
+                if (ent && typeof ent === 'object') {
+                    ent.hp = 0;
+                    ent.dead = true;
+                    ent.entState = EntityState.DEAD;
+                    const maxHp = Math.max(0, Math.round(Number(ent.maxHp ?? levelEntity?.maxHp ?? 0)));
+                    if (maxHp > 0) {
+                        ent.healthDelta = -maxHp;
+                        ent.health_delta = -maxHp;
+                    }
+                    client.entities.set(rawEntityId, ent);
+                }
+                const { CombatHandler } = require('./CombatHandler') as typeof import('./CombatHandler');
+                CombatHandler.correctServerAuthorityHostileProxy(
+                    client,
+                    getClientLevelScope(client),
+                    levelEntity,
+                    isDefeatEntState ? 'dead_proxy_state_converge' : 'dead_proxy_active_state_rejected',
+                    rawEntityId
+                );
+                logJcMini1Authority('proxy_state_relay', {
+                    packetId: '0x07',
+                    reason: isDefeatEntState ? 'dead_proxy_state_ignored' : 'dead_proxy_active_state_rejected',
+                    entityId,
+                    localEntityId: rawEntityId,
+                    source: client.character?.name ?? '',
+                    sourceToken: client.token,
+                    scope: getClientLevelScope(client),
+                    deltaX,
+                    deltaY,
+                    requestedEntState: entState,
+                    canonicalEntState: EntityState.DEAD,
+                    hp: 0,
+                    maxHp: Math.round(Number(levelEntity?.maxHp ?? ent?.maxHp ?? 0)),
+                    dead: true
+                });
+                return;
+            }
+            if (isDefeatEntState && !canonicalDead) {
+                const { CombatHandler } = require('./CombatHandler') as typeof import('./CombatHandler');
+                CombatHandler.correctServerAuthorityHostileProxy(
+                    client,
+                    getClientLevelScope(client),
+                    levelEntity,
+                    'proxy_predicted_state_rejected',
+                    rawEntityId
+                );
+                logJcMini1Authority('proxy_state_relay', {
+                    packetId: '0x07',
+                    reason: 'proxy_predicted_state_rejected',
+                    entityId,
+                    localEntityId: rawEntityId,
+                    source: client.character?.name ?? '',
+                    sourceToken: client.token,
+                    scope: getClientLevelScope(client),
+                    hp: Math.round(Number(levelEntity?.hp ?? 0)),
+                    maxHp: Math.round(Number(levelEntity?.maxHp ?? 0)),
+                    dead: Boolean(levelEntity?.dead),
+                    entState: levelEntity?.entState
+                });
+                return;
+            }
+
+            if (!EntityHandler.isServerAuthorityProxyOwner(client, levelEntity, rawEntityId)) {
+                logJcMini1Authority('proxy_state_relay', {
+                    packetId: '0x07',
+                    reason: 'follower_proxy_state_ignored',
+                    entityId,
+                    localEntityId: rawEntityId,
+                    source: client.character?.name ?? '',
+                    sourceToken: client.token,
+                    ownerToken: Math.round(Number(levelEntity?.proxyOwnerToken ?? 0)),
+                    scope: getClientLevelScope(client),
+                    deltaX,
+                    deltaY,
+                    entState
+                });
+                return;
+            }
+
+            logJcMini1Authority('proxy_state_relay', {
+                packetId: '0x07',
+                reason: 'owner_proxy_state_relay',
+                entityId,
+                localEntityId: rawEntityId,
+                source: client.character?.name ?? '',
+                sourceToken: client.token,
+                scope: getClientLevelScope(client),
+                deltaX,
+                deltaY,
+                entState
+            });
+        }
         const isAliasedSharedClientSpawnUpdate =
             rawEntityId !== entityId &&
             EntityHandler.shouldMirrorClientSpawnEntityToParty(currentLevel, levelEntity ?? ent);
-        if (isAliasedSharedClientSpawnUpdate) {
-            EntityHandler.markSharedEntityRemoteUpdatesReady(client, entityId);
-            const ownerToken = Math.round(Number((levelEntity ?? ent)?.ownerToken ?? 0));
-            if (ownerToken > 0 && ownerToken !== client.token) {
+        const isSharedClientSpawnEntity = EntityHandler.shouldMirrorClientSpawnEntityToParty(currentLevel, levelEntity ?? ent);
+        if (isSharedClientSpawnEntity) {
+            const sharedDead = Boolean((levelEntity ?? ent)?.dead) ||
+                Number((levelEntity ?? ent)?.entState ?? EntityState.ACTIVE) === EntityState.DEAD ||
+                Math.round(Number((levelEntity ?? ent)?.hp ?? 1)) <= 0;
+            if (sharedDead && !isDefeatEntState) {
+                if (ent && typeof ent === 'object') {
+                    ent.hp = 0;
+                    ent.dead = true;
+                    ent.entState = EntityState.DEAD;
+                    const maxHp = Math.max(0, Math.round(Number(ent.maxHp ?? levelEntity?.maxHp ?? 0)));
+                    if (maxHp > 0) {
+                        ent.healthDelta = -maxHp;
+                        ent.health_delta = -maxHp;
+                    }
+                    client.entities.set(rawEntityId, ent);
+                }
+                if (levelEntity && typeof levelEntity === 'object') {
+                    levelEntity.hp = 0;
+                    levelEntity.dead = true;
+                    levelEntity.entState = EntityState.DEAD;
+                    const maxHp = Math.max(0, Math.round(Number(levelEntity.maxHp ?? ent?.maxHp ?? 0)));
+                    if (maxHp > 0) {
+                        levelEntity.healthDelta = -maxHp;
+                        levelEntity.health_delta = -maxHp;
+                    }
+                }
+                client.send(
+                    0x07,
+                    LevelHandler.buildEntityIncrementalUpdatePayload(
+                        rawEntityId,
+                        0,
+                        0,
+                        0,
+                        EntityState.DEAD,
+                        {
+                            bLeft: Boolean(levelEntity?.facingLeft ?? ent?.facingLeft ?? flags.bLeft),
+                            bRunning: false,
+                            bJumping: false,
+                            bDropping: false,
+                            bBackpedal: false
+                        },
+                        false,
+                        0
+                    )
+                );
+                if (currentLevel === 'JC_Mini1Hard') {
+                    logJcMini1Authority('client_spawn_dead_state_rejected', {
+                        packetId: '0x07',
+                        entityId,
+                        localEntityId: rawEntityId,
+                        source: client.character?.name ?? '',
+                        sourceToken: client.token,
+                        scope: getClientLevelScope(client),
+                        requestedEntState: entState,
+                        canonicalEntState: EntityState.DEAD,
+                        hp: 0,
+                        maxHp: Math.round(Number(levelEntity?.maxHp ?? ent?.maxHp ?? 0)),
+                        dead: true
+                    });
+                }
                 return;
             }
+        }
+        if (isAliasedSharedClientSpawnUpdate) {
+            EntityHandler.markSharedEntityRemoteUpdatesReady(client, entityId);
         } else {
             EntityHandler.markSharedEntityRemoteUpdatesReady(client, entityId);
+        }
+        if (isSharedClientSpawnEntity) {
+            const sharedEntityAuthorityToken = Math.max(
+                0,
+                Math.round(Number(
+                    (levelEntity ?? ent)?.combatAuthorityToken ??
+                    (levelEntity ?? ent)?.firstCombatAuthorityToken ??
+                    (levelEntity ?? ent)?.ownerToken ??
+                    0
+                ) || 0)
+            );
+            if (sharedEntityAuthorityToken > 0 && sharedEntityAuthorityToken !== client.token) {
+                return;
+            }
         }
 
         const isEnemyEntity =
@@ -4448,6 +4675,9 @@ export class LevelHandler {
         const isActiveSelfState = isSelf && !canonicalIsDefeatState;
 
         const previousX = Number(ent.x ?? 0);
+        const previousCanonicalX = Number(levelEntity?.x ?? ent.x ?? 0);
+        const previousCanonicalY = Number(levelEntity?.y ?? ent.y ?? 0);
+        const previousCanonicalV = Number(levelEntity?.v ?? ent.v ?? 0);
         ent.x += deltaX;
         ent.y += deltaY;
         ent.v = Number(ent.v ?? 0) + deltaVX;
@@ -4575,13 +4805,25 @@ export class LevelHandler {
         }
 
         const relayEntity = levelEntity ?? ent;
+        const relayCanonicalDelta =
+            isSharedClientSpawnEntity &&
+            Boolean(levelEntity && levelEntity !== ent);
+        const relayDeltaX = relayCanonicalDelta
+            ? Math.round(Number((levelEntity ?? ent).x ?? 0) - previousCanonicalX)
+            : deltaX;
+        const relayDeltaY = relayCanonicalDelta
+            ? Math.round(Number((levelEntity ?? ent).y ?? 0) - previousCanonicalY)
+            : deltaY;
+        const relayDeltaVX = relayCanonicalDelta
+            ? Math.round(Number((levelEntity ?? ent).v ?? 0) - previousCanonicalV)
+            : deltaVX;
         const relayData = rawEntityId === entityId
             ? data
             : LevelHandler.buildEntityIncrementalUpdatePayload(
                 entityId,
-                deltaX,
-                deltaY,
-                deltaVX,
+                relayDeltaX,
+                relayDeltaY,
+                relayDeltaVX,
                 canonicalEntState,
                 flags,
                 isAirborne,
@@ -4593,10 +4835,12 @@ export class LevelHandler {
             }
             const isSharedClientSpawnEntity = EntityHandler.shouldMirrorClientSpawnEntityToParty(client.currentLevel, relayEntity);
             if (isSharedClientSpawnEntity) {
-                // These enemies are physically owned by each Flash client.
-                // Relaying remote movement into a joiner's local enemy can make
-                // LinkUpdater touch gfx before the client has built it.
-                continue;
+                // Wait until the joiner's local proxy is built; after that the
+                // owner must drive movement/state so party clients do not fork
+                // enemy simulation inside the same dungeon instance.
+                if (!EntityHandler.canClientResolveCanonicalEntity(other, entityId)) {
+                    continue;
+                }
             } else if (!EntityHandler.ensureEntityKnown(other, client.currentLevel, entityId)) {
                 continue;
             }
@@ -4606,9 +4850,9 @@ export class LevelHandler {
                 ? relayData
                 : LevelHandler.buildEntityIncrementalUpdatePayload(
                     localEntityId,
-                    deltaX,
-                    deltaY,
-                    deltaVX,
+                    relayDeltaX,
+                    relayDeltaY,
+                    relayDeltaVX,
                     canonicalEntState,
                     flags,
                     isAirborne,

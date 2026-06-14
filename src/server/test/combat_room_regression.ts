@@ -1135,7 +1135,9 @@ async function testPartySharedDungeonDestroyKeepsJoinerDeathState(): Promise<voi
         clientSpawned: true,
         ownerToken: sender.token,
         summonerId: sender.clientEntID,
-        roomId: sender.currentRoomId
+        roomId: sender.currentRoomId,
+        hp: 100,
+        maxHp: 100
     };
     GlobalState.levelEntities.get(getClientLevelScope(sender as never))?.set(hostile.id, hostile);
     watcher.entities.set(hostile.id, { ...hostile, ownerToken: watcher.token, roomId: watcher.currentRoomId });
@@ -1150,9 +1152,9 @@ async function testPartySharedDungeonDestroyKeepsJoinerDeathState(): Promise<voi
     await CombatHandler.handleEntityDestroy(sender as never, bb.toBuffer());
 
     assert.equal(
-        watcher.sentPackets.some((packet) => packet.id === 0x0D && parseDestroyEntityId(packet.payload) === hostile.id),
-        false,
-        'party joiners should not receive immediate remove packets for shared dungeon enemy death'
+        watcher.sentPackets.some((packet) => packet.id === 0x78 && parseHpDelta(packet.payload).entityId === hostile.id && parseHpDelta(packet.payload).delta === -100),
+        true,
+        'party joiners should receive a local hp correction before shared dungeon enemy cleanup'
     );
     assert.equal(
         watcher.sentPackets.some((packet) => {
@@ -1165,10 +1167,13 @@ async function testPartySharedDungeonDestroyKeepsJoinerDeathState(): Promise<voi
         true,
         'party joiners should receive a dead state so the enemy dies locally instead of disappearing'
     );
+    assert.equal(
+        watcher.sentPackets.some((packet) => packet.id === 0x0D && parseDestroyEntityId(packet.payload) === hostile.id),
+        true,
+        'party joiners should receive local destroy cleanup after shared dungeon enemy death'
+    );
     assert.equal(watcher.knownEntityIds.has(hostile.id), false);
-    assert.equal(watcher.entities.has(hostile.id), true, 'joiner local enemy record should remain for the death display');
-    assert.equal(watcher.entities.get(hostile.id)?.dead, true);
-    assert.equal(watcher.entities.get(hostile.id)?.entState, EntityState.DEAD);
+    assert.equal(watcher.entities.has(hostile.id), false, 'joiner local enemy record should be removed after destroy cleanup');
 }
 
 async function testOutdoorEntityDestroyStaysOwnerLocal(): Promise<void> {
@@ -1309,6 +1314,12 @@ async function testAliasedDungeonHostileHitUsesCanonicalEntity(): Promise<void> 
     await CombatHandler.handlePowerHit(partyOtherRoom as never, buildPowerHitPayload(8701, partyOtherRoom.clientEntID, 25, 77));
 
     assert.equal(hostile.hp, 75, 'hit against a local duplicate id should apply to the canonical hostile');
+    assert.equal((hostile as any).combatAuthorityToken, partyOtherRoom.token, 'first attacker should become the shared hostile combat authority');
+    assert.equal(
+        partyOtherRoom.entities.get(8701)?.combatAuthorityToken,
+        partyOtherRoom.token,
+        'first attacker authority should propagate to the local duplicate cache'
+    );
     const relayedHit = sender.sentPackets.find((packet) => packet.id === 0x0A);
     assert.ok(relayedHit, 'canonical hit should relay to the party peer');
     assert.deepEqual(
@@ -1392,6 +1403,352 @@ async function testSharedDungeonHostileCombatWaitsForJoinerAdoption(): Promise<v
     );
 }
 
+async function testSharedDungeonHostilePowerCastCanonicalizesLocalSource(): Promise<void> {
+    const owner = createFakeClient(532, 'Alpha', 1);
+    const joiner = createFakeClient(533, 'Beta', 1);
+
+    owner.currentLevel = 'TutorialDungeon';
+    joiner.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(owner);
+    attachPlayerEntity(joiner);
+
+    GlobalState.partyByMember.set('alpha', 13);
+    GlobalState.partyByMember.set('beta', 13);
+
+    const hostile = {
+        id: 9821,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 13,
+        roomId: owner.currentRoomId,
+        hp: 100,
+        maxHp: 100
+    };
+    const joinerLocalId = 8821;
+    GlobalState.levelEntities.get(getClientLevelScope(owner as never))?.set(hostile.id, hostile);
+    owner.knownEntityIds.add(hostile.id);
+    joiner.entities.set(joinerLocalId, {
+        ...hostile,
+        id: joinerLocalId,
+        ownerToken: joiner.token,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(joiner.token, joiner as never);
+
+    await CombatHandler.handlePowerCast(
+        joiner as never,
+        buildPowerCastPayload(joinerLocalId, 1693, {
+            hasTargetPos: true,
+            targetX: owner.entities.get(owner.clientEntID)?.x ?? 0,
+            targetY: owner.entities.get(owner.clientEntID)?.y ?? 0
+        })
+    );
+
+    assert.equal(joiner.entityIdAliases.get(joinerLocalId), hostile.id, 'hostile cast should remember local-to-canonical alias');
+    const relayedCast = owner.sentPackets.find((packet) => packet.id === 0x09);
+    assert.ok(relayedCast, 'party peer should receive hostile cast start immediately');
+    assert.equal(
+        parsePowerCastPayload(relayedCast!.payload).sourceId,
+        hostile.id,
+        'relayed hostile cast should use the canonical hostile id'
+    );
+}
+
+async function testSharedDungeonHostilePowerCastUsesCombatAuthority(): Promise<void> {
+    const owner = createFakeClient(536, 'Alpha', 1);
+    const authority = createFakeClient(537, 'Beta', 1);
+
+    owner.currentLevel = 'TutorialDungeon';
+    authority.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(owner);
+    attachPlayerEntity(authority);
+
+    GlobalState.partyByMember.set('alpha', 15);
+    GlobalState.partyByMember.set('beta', 15);
+
+    const hostile = {
+        id: 9841,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 15,
+        roomId: owner.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        combatAuthorityToken: authority.token,
+        firstCombatAuthorityToken: authority.token
+    };
+    const authorityLocalId = 8841;
+    GlobalState.levelEntities.get(getClientLevelScope(owner as never))?.set(hostile.id, hostile);
+    owner.knownEntityIds.add(hostile.id);
+    authority.entities.set(authorityLocalId, {
+        ...hostile,
+        id: authorityLocalId,
+        ownerToken: authority.token,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(authority.token, authority as never);
+
+    await CombatHandler.handlePowerCast(
+        owner as never,
+        buildPowerCastPayload(hostile.id, 1693, {
+            hasTargetPos: true,
+            targetX: authority.entities.get(authority.clientEntID)?.x ?? 0,
+            targetY: authority.entities.get(authority.clientEntID)?.y ?? 0
+        })
+    );
+
+    assert.equal(
+        authority.sentPackets.some((packet) => packet.id === 0x09),
+        false,
+        'non-authority shared hostile cast should not relay over the first attacker simulation'
+    );
+
+    owner.sentPackets.length = 0;
+    authority.sentPackets.length = 0;
+
+    await CombatHandler.handlePowerCast(
+        authority as never,
+        buildPowerCastPayload(authorityLocalId, 1693, {
+            hasTargetPos: true,
+            targetX: owner.entities.get(owner.clientEntID)?.x ?? 0,
+            targetY: owner.entities.get(owner.clientEntID)?.y ?? 0
+        })
+    );
+
+    const relayedCast = owner.sentPackets.find((packet) => packet.id === 0x09);
+    assert.ok(relayedCast, 'combat authority shared hostile cast should relay to party peers');
+    assert.equal(
+        parsePowerCastPayload(relayedCast!.payload).sourceId,
+        hostile.id,
+        'authority hostile cast should canonicalize the local source id for the owner'
+    );
+}
+
+async function testSharedDungeonHostileHitRelaysToPartyAcrossRooms(): Promise<void> {
+    const victim = createFakeClient(534, 'Alpha', 1);
+    const watcher = createFakeClient(535, 'Beta', 7);
+
+    victim.currentLevel = 'TutorialDungeon';
+    watcher.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(victim);
+    attachPlayerEntity(watcher);
+
+    GlobalState.partyByMember.set('alpha', 14);
+    GlobalState.partyByMember.set('beta', 14);
+
+    const hostile = {
+        id: 9831,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: victim.token,
+        ownerPartyId: 14,
+        roomId: victim.currentRoomId,
+        hp: 100,
+        maxHp: 100
+    };
+    const victimLocalId = 8831;
+    const watcherLocalId = 7831;
+    GlobalState.levelEntities.get(getClientLevelScope(victim as never))?.set(hostile.id, hostile);
+    victim.entities.set(victimLocalId, {
+        ...hostile,
+        id: victimLocalId,
+        ownerToken: victim.token,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+    watcher.entityIdAliases.set(watcherLocalId, hostile.id);
+    watcher.knownEntityIds.add(hostile.id);
+    watcher.entities.set(watcherLocalId, {
+        ...hostile,
+        id: watcherLocalId,
+        ownerToken: watcher.token,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+
+    GlobalState.sessionsByToken.set(victim.token, victim as never);
+    GlobalState.sessionsByToken.set(watcher.token, watcher as never);
+
+    await CombatHandler.handlePowerHit(victim as never, buildPowerHitPayload(victim.clientEntID, victimLocalId, 10, 1693));
+
+    const relayedHit = watcher.sentPackets.find((packet) => packet.id === 0x0A);
+    assert.ok(relayedHit, 'party peer in the same dungeon should receive hostile hit even across room ids');
+    assert.deepEqual(
+        parsePowerHitIds(relayedHit!.payload),
+        { targetId: victim.clientEntID, sourceId: watcherLocalId, damage: 10 },
+        'relayed hostile hit should use the watcher local hostile id'
+    );
+}
+
+async function testSharedDungeonHostilePowerHitUsesCombatAuthority(): Promise<void> {
+    const owner = createFakeClient(538, 'Alpha', 1);
+    const authority = createFakeClient(539, 'Beta', 7);
+
+    owner.currentLevel = 'TutorialDungeon';
+    authority.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(owner);
+    attachPlayerEntity(authority);
+
+    GlobalState.partyByMember.set('alpha', 16);
+    GlobalState.partyByMember.set('beta', 16);
+
+    const hostile = {
+        id: 9851,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 16,
+        roomId: owner.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        combatAuthorityToken: authority.token,
+        firstCombatAuthorityToken: authority.token
+    };
+    const authorityLocalId = 8851;
+    GlobalState.levelEntities.get(getClientLevelScope(owner as never))?.set(hostile.id, hostile);
+    owner.knownEntityIds.add(hostile.id);
+    authority.entityIdAliases.set(authorityLocalId, hostile.id);
+    authority.knownEntityIds.add(hostile.id);
+    authority.entities.set(authorityLocalId, {
+        ...hostile,
+        id: authorityLocalId,
+        ownerToken: authority.token,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(authority.token, authority as never);
+
+    await CombatHandler.handlePowerHit(owner as never, buildPowerHitPayload(authority.clientEntID, hostile.id, 12, 1693));
+
+    assert.equal(authority.authoritativeCurrentHp, 100, 'non-authority hostile hit should not damage the victim');
+    assert.equal(
+        authority.sentPackets.some((packet) => packet.id === 0x0A),
+        false,
+        'non-authority hostile hit should not relay to the victim'
+    );
+
+    owner.sentPackets.length = 0;
+    authority.sentPackets.length = 0;
+
+    await CombatHandler.handlePowerHit(authority as never, buildPowerHitPayload(owner.clientEntID, authorityLocalId, 12, 1693));
+
+    assert.equal(owner.authoritativeCurrentHp, 88, 'combat authority hostile hit should damage the target');
+    const relayedHit = owner.sentPackets.find((packet) => packet.id === 0x0A);
+    assert.ok(relayedHit, 'combat authority hostile hit should relay to the target');
+    assert.deepEqual(
+        parsePowerHitIds(relayedHit!.payload),
+        { targetId: owner.clientEntID, sourceId: hostile.id, damage: 12 },
+        'authority hostile hit should canonicalize the local source id for the owner'
+    );
+}
+
+async function testSharedDungeonHostileDotUsesCombatAuthority(): Promise<void> {
+    const owner = createFakeClient(546, 'Alpha', 1);
+    const authority = createFakeClient(547, 'Beta', 7);
+
+    owner.currentLevel = 'TutorialDungeon';
+    authority.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(owner);
+    attachPlayerEntity(authority);
+
+    GlobalState.partyByMember.set('alpha', 17);
+    GlobalState.partyByMember.set('beta', 17);
+
+    const hostile = {
+        id: 9861,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 17,
+        roomId: owner.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        combatAuthorityToken: authority.token,
+        firstCombatAuthorityToken: authority.token
+    };
+    const authorityLocalId = 8861;
+    GlobalState.levelEntities.get(getClientLevelScope(owner as never))?.set(hostile.id, hostile);
+    owner.knownEntityIds.add(hostile.id);
+    authority.entityIdAliases.set(authorityLocalId, hostile.id);
+    authority.knownEntityIds.add(hostile.id);
+    authority.entities.set(authorityLocalId, {
+        ...hostile,
+        id: authorityLocalId,
+        ownerToken: authority.token,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(authority.token, authority as never);
+
+    await CombatHandler.handleBuffTickDot(owner as never, buildBuffTickDotPayload(authority.clientEntID, hostile.id, 88, 7));
+
+    assert.equal(
+        authority.sentPackets.some((packet) => packet.id === 0x79),
+        false,
+        'non-authority shared hostile DoT should not relay over first attacker simulation'
+    );
+
+    owner.sentPackets.length = 0;
+    authority.sentPackets.length = 0;
+
+    await CombatHandler.handleBuffTickDot(authority as never, buildBuffTickDotPayload(owner.clientEntID, authorityLocalId, 88, 7));
+
+    const relayedDot = owner.sentPackets.find((packet) => packet.id === 0x79);
+    assert.ok(relayedDot, 'combat authority shared hostile DoT should relay to party peers');
+    assert.deepEqual(
+        parseBuffTickDotIds(relayedDot!.payload),
+        { targetId: owner.clientEntID, sourceId: hostile.id, powerId: 88, damage: 7 },
+        'authority hostile DoT should canonicalize the local source id for the owner'
+    );
+}
+
 async function testSharedDungeonHostileDefeatUsesViewerLocalId(): Promise<void> {
     const owner = createFakeClient(540, 'Alpha', 1);
     const joiner = createFakeClient(541, 'Beta', 1);
@@ -1438,6 +1795,136 @@ async function testSharedDungeonHostileDefeatUsesViewerLocalId(): Promise<void> 
         parseEntityState(defeatState!.payload),
         { entityId: 8901, entState: EntityState.DEAD },
         'shared hostile death state should use the joiner local enemy id'
+    );
+    const hpCorrection = joiner.sentPackets.find((packet) => packet.id === 0x78);
+    assert.ok(hpCorrection, 'joiner should receive hp correction before local shared hostile cleanup');
+    assert.deepEqual(parseHpDelta(hpCorrection!.payload), { entityId: 8901, delta: -100 });
+    const destroyPacket = joiner.sentPackets.find((packet) => packet.id === 0x0D);
+    assert.ok(destroyPacket, 'joiner should receive local destroy cleanup for the shared hostile');
+    assert.equal(parseDestroyEntityId(destroyPacket!.payload), 8901);
+    assert.equal(joiner.entities.has(8901), false, 'joiner local hostile cache should be removed after destroy cleanup');
+}
+
+async function testSharedDungeonHostilePowerHitSynchronizesJoinerLocalDeath(): Promise<void> {
+    const owner = createFakeClient(542, 'Alpha', 1);
+    const joiner = createFakeClient(543, 'Beta', 1);
+
+    owner.currentLevel = 'TutorialDungeon';
+    joiner.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(owner);
+    attachPlayerEntity(joiner);
+
+    GlobalState.partyByMember.set('alpha', 11);
+    GlobalState.partyByMember.set('beta', 11);
+
+    const hostile = {
+        id: 9911,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 11,
+        summonerId: owner.clientEntID,
+        roomId: owner.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        dead: false
+    };
+    const joinerLocalId = 8911;
+    GlobalState.levelEntities.get(getClientLevelScope(owner as never))?.set(hostile.id, hostile);
+    owner.knownEntityIds.add(hostile.id);
+    joiner.entityIdAliases.set(joinerLocalId, hostile.id);
+    joiner.knownEntityIds.add(hostile.id);
+    joiner.entities.set(joinerLocalId, {
+        ...hostile,
+        id: joinerLocalId,
+        sharedCanonicalId: hostile.id,
+        canonicalEntityId: hostile.id
+    });
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(joiner.token, joiner as never);
+
+    await CombatHandler.handlePowerHit(owner as never, buildPowerHitPayload(hostile.id, owner.clientEntID, 100, 77));
+
+    assert.equal(hostile.hp, 0, 'lethal hit should kill the canonical shared hostile');
+    assert.equal(hostile.dead, true, 'canonical shared hostile should be marked dead');
+
+    const relayedHit = joiner.sentPackets.find((packet) => packet.id === 0x0A);
+    assert.ok(relayedHit, 'joiner should receive the lethal hit for its local hostile');
+    assert.deepEqual(
+        parsePowerHitIds(relayedHit!.payload),
+        { targetId: joinerLocalId, sourceId: owner.clientEntID, damage: 100 },
+        'joiner lethal hit should use the local hostile id'
+    );
+    const deathState = joiner.sentPackets.find((packet) => packet.id === 0x07);
+    assert.ok(deathState, 'joiner should receive a local death state after the lethal hit');
+    assert.deepEqual(
+        parseEntityState(deathState!.payload),
+        { entityId: joinerLocalId, entState: EntityState.DEAD },
+        'lethal hit death state should use the joiner local hostile id'
+    );
+    assert.equal(
+        joiner.sentPackets.some((packet) => packet.id === 0x78 && parseHpDelta(packet.payload).entityId === joinerLocalId),
+        false,
+        'lethal hit already carries the damage, so no extra hp correction should be sent'
+    );
+    const destroyPacket = joiner.sentPackets.find((packet) => packet.id === 0x0D);
+    assert.ok(destroyPacket, 'joiner should receive local destroy cleanup after lethal hit death state');
+    assert.equal(parseDestroyEntityId(destroyPacket!.payload), joinerLocalId);
+    assert.equal(joiner.entities.has(joinerLocalId), false, 'joiner local hostile cache should be removed after destroy cleanup');
+}
+
+async function testSharedDungeonHostileLethalHitWaitsForJoinerAdoption(): Promise<void> {
+    const owner = createFakeClient(544, 'Alpha', 1);
+    const joiner = createFakeClient(545, 'Beta', 1);
+
+    owner.currentLevel = 'TutorialDungeon';
+    joiner.currentLevel = 'TutorialDungeon';
+
+    attachPlayerEntity(owner);
+    attachPlayerEntity(joiner);
+
+    GlobalState.partyByMember.set('alpha', 12);
+    GlobalState.partyByMember.set('beta', 12);
+
+    const hostile = {
+        id: 9921,
+        name: 'SharedGoblin',
+        isPlayer: false,
+        x: 10,
+        y: 15,
+        v: 0,
+        team: 2,
+        entState: EntityState.ACTIVE,
+        clientSpawned: true,
+        ownerToken: owner.token,
+        ownerPartyId: 12,
+        summonerId: owner.clientEntID,
+        roomId: owner.currentRoomId,
+        hp: 100,
+        maxHp: 100,
+        dead: false
+    };
+    GlobalState.levelEntities.get(getClientLevelScope(owner as never))?.set(hostile.id, hostile);
+    owner.knownEntityIds.add(hostile.id);
+
+    GlobalState.sessionsByToken.set(owner.token, owner as never);
+    GlobalState.sessionsByToken.set(joiner.token, joiner as never);
+
+    await CombatHandler.handlePowerHit(owner as never, buildPowerHitPayload(hostile.id, owner.clientEntID, 100, 77));
+
+    assert.equal(hostile.dead, true, 'canonical shared hostile should still die');
+    assert.equal(
+        joiner.sentPackets.some((packet) => packet.id === 0x0A || packet.id === 0x07),
+        false,
+        'joiner should not receive hit or death packets before adopting the shared hostile'
     );
 }
 
@@ -1586,6 +2073,16 @@ async function testEnemyDefeatNotSuppressedByViewerPlayerIdOverlap(): Promise<vo
         }),
         true,
         'viewer should still receive the enemy death state even when the local alias overlaps its player id'
+    );
+    assert.equal(
+        watcher.sentPackets.some((packet) => packet.id === 0x0D && parseDestroyEntityId(packet.payload) === hostile.id),
+        true,
+        'overlap cleanup should destroy the hostile canonical id, not the viewer player id'
+    );
+    assert.equal(
+        watcher.sentPackets.some((packet) => packet.id === 0x0D && parseDestroyEntityId(packet.payload) === watcher.clientEntID),
+        false,
+        'overlap cleanup must not destroy the viewer player id'
     );
 }
 
@@ -1769,7 +2266,70 @@ async function main(): Promise<void> {
         GlobalState.entityLifeNonces.clear();
         GlobalState.entityLastRewardNonces.clear();
 
+        await testSharedDungeonHostilePowerCastCanonicalizesLocalSource();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testSharedDungeonHostilePowerCastUsesCombatAuthority();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testSharedDungeonHostileHitRelaysToPartyAcrossRooms();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testSharedDungeonHostilePowerHitUsesCombatAuthority();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testSharedDungeonHostileDotUsesCombatAuthority();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
         await testSharedDungeonHostileDefeatUsesViewerLocalId();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testSharedDungeonHostilePowerHitSynchronizesJoinerLocalDeath();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.levelEntities.clear();
+        GlobalState.partyByMember.clear();
+        GlobalState.combatContributions.clear();
+        GlobalState.entityLifeNonces.clear();
+        GlobalState.entityLastRewardNonces.clear();
+
+        await testSharedDungeonHostileLethalHitWaitsForJoinerAdoption();
 
         GlobalState.sessionsByToken.clear();
         GlobalState.levelEntities.clear();

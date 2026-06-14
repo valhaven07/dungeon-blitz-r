@@ -131,9 +131,9 @@ function parseMountEquipPacket(payload: Buffer): { entityId: number; mountId: nu
     };
 }
 
-function parseEnterWorldLevelPacket(payload: Buffer): { mapLevel: number; baseLevel: number; internalName: string } {
+function parseEnterWorldLevelPacket(payload: Buffer): { transferToken: number; mapLevel: number; baseLevel: number; internalName: string } {
     const br = new BitReader(payload);
-    br.readMethod4();
+    const transferToken = br.readMethod4();
     br.readMethod4();
     br.readMethod13();
     const hasOldCoord = br.readMethod15();
@@ -148,7 +148,7 @@ function parseEnterWorldLevelPacket(payload: Buffer): { mapLevel: number; baseLe
     const baseLevel = br.readMethod6(6);
     const internalName = br.readMethod13();
 
-    return { mapLevel, baseLevel, internalName };
+    return { transferToken, mapLevel, baseLevel, internalName };
 }
 
 function withMockedRandom(values: number[], fn: () => void): void {
@@ -527,6 +527,97 @@ function testBuildTransferSyncStateAllowsSameAccountDifferentCharacterPartyAncho
     assert.equal(syncState.syncAnchorCharacterName, 'Fleerpuh');
     assert.equal(syncState.syncRoomId, 4);
     assert.deepEqual(syncState.syncStartedRoomIds, [4]);
+}
+
+async function testPartyDungeonTransferEnterWorldUsesAnchorToken(): Promise<void> {
+    const follower = createClient();
+    follower.token = 7201;
+    follower.character = createCharacter('GoblinFollower');
+    follower.character.CurrentLevel = { name: 'NewbieRoad', x: 1421, y: 826 };
+    follower.character.missions = {
+        [String(MissionID.GoblinRiver)]: {
+            state: 1,
+            currCount: 0
+        }
+    };
+    follower.currentLevel = 'NewbieRoad';
+    follower.lastDoorId = 105;
+    follower.lastDoorTargetLevel = 'GoblinRiverDungeon';
+    follower.playerSpawned = true;
+
+    const leader = createClient();
+    leader.token = 7200;
+    leader.character = createCharacter('GoblinLeader');
+    leader.currentLevel = 'GoblinRiverDungeon';
+    leader.levelInstanceId = 'goblin-party-run';
+    leader.entryLevel = 'NewbieRoad';
+    leader.entryX = 1421;
+    leader.entryY = 826;
+    leader.entryHasCoord = true;
+    leader.syncAnchorStartedAt = 1111;
+    leader.syncAnchorToken = leader.token;
+    leader.syncAnchorCharacterName = leader.character.name;
+    leader.currentRoomId = 3;
+    leader.startedRoomEvents.add('GoblinRiverDungeon:3');
+    leader.clientEntID = 9200;
+    leader.playerSpawned = true;
+
+    GlobalState.sessionsByToken.set(leader.token, leader as never);
+    GlobalState.partyByMember.set('goblinfollower', 202);
+    GlobalState.partyByMember.set('goblinleader', 202);
+
+    const originalRandom = Math.random;
+    Math.random = () => 7202.5 / 0x10000;
+    try {
+        await LevelHandler.handleLevelTransferRequest(
+            follower as never,
+            createLevelTransferPacket(follower.token, 'GoblinRiverDungeon')
+        );
+    } finally {
+        Math.random = originalRandom;
+    }
+
+    const enterWorldPacket = follower.sentPackets.find((packet: { id: number }) => packet.id === 0x21);
+    assert.ok(enterWorldPacket, 'party dungeon transfer should send an enter-world packet');
+    const decoded = parseEnterWorldLevelPacket(enterWorldPacket.payload);
+    assert.equal(decoded.transferToken, leader.token, 'party dungeon enter-world packet should use the anchor transfer token');
+    assert.equal(decoded.internalName, 'GoblinRiverDungeon');
+    assert.equal(
+        GlobalState.transferTokenAliases.get(follower.token),
+        7202,
+        'server recovery bookkeeping should still alias the request token to the newly allocated transfer token'
+    );
+}
+
+function testGameLoginAnchorTokenResolvesPartyDungeonPendingTransfer(): void {
+    const client = createClient();
+    client.userId = 41;
+    client.character = createCharacter('GoblinFollower');
+
+    const pendingToken = 7202;
+    const anchorToken = 7200;
+    const character = createCharacter('GoblinFollower');
+    GlobalState.pendingWorld.set(pendingToken, {
+        character,
+        userId: 41,
+        targetLevel: 'GoblinRiverDungeon',
+        levelInstanceId: 'goblin-party-run',
+        previousLevel: 'NewbieRoad',
+        newX: 1421,
+        newY: 826,
+        newHasCoord: true,
+        syncAnchorToken: anchorToken,
+        syncAnchorStartedAt: 1111,
+        syncAnchorCharacterName: 'GoblinLeader',
+        playSessionStartedAt: 2222
+    });
+    GlobalState.pendingExtended.set(pendingToken, false);
+
+    const resolved = (CharacterHandler as any).resolvePendingGameLogin(client as never, anchorToken);
+    assert.ok(resolved, 'game login should resolve the anchor token sent in EnterWorld');
+    assert.equal(resolved.token, pendingToken, 'anchor login token should map to the joiner pending transfer token');
+    assert.equal(resolved.entry.character.name, character.name);
+    assert.equal(resolved.source, `sync-anchor:${anchorToken}->${pendingToken}`);
 }
 
 function testBuildTransferSyncStateSkipsStrangerDungeonInstance(): void {
@@ -2951,6 +3042,28 @@ async function main(): Promise<void> {
         GlobalState.sessionsByUserId.clear();
         GlobalState.sessionsByCharacterName.clear();
         GlobalState.pendingWorld.clear();
+        GlobalState.pendingExtended.clear();
+        GlobalState.transferTokenAliases.clear();
+        GlobalState.partyByMember.clear();
+
+        await testPartyDungeonTransferEnterWorldUsesAnchorToken();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.sessionsByUserId.clear();
+        GlobalState.sessionsByCharacterName.clear();
+        GlobalState.pendingWorld.clear();
+        GlobalState.pendingExtended.clear();
+        GlobalState.transferTokenAliases.clear();
+        GlobalState.partyByMember.clear();
+
+        testGameLoginAnchorTokenResolvesPartyDungeonPendingTransfer();
+
+        GlobalState.sessionsByToken.clear();
+        GlobalState.sessionsByUserId.clear();
+        GlobalState.sessionsByCharacterName.clear();
+        GlobalState.pendingWorld.clear();
+        GlobalState.pendingExtended.clear();
+        GlobalState.transferTokenAliases.clear();
         GlobalState.partyByMember.clear();
 
         testBuildTransferSyncStateSkipsStrangerDungeonInstance();
