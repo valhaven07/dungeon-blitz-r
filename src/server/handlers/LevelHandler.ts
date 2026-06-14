@@ -4613,6 +4613,20 @@ export class LevelHandler {
                         dead: true
                     });
                 }
+                const { CombatHandler } = require('./CombatHandler') as typeof import('./CombatHandler');
+                CombatHandler.convergePartySharedHostileState(
+                    client,
+                    getClientLevelScope(client),
+                    levelEntity ?? ent,
+                    'shared_dead_active_state_rejected',
+                    {
+                        includeParty: true,
+                        sendHpCorrection: true,
+                        sendDeathState: true,
+                        forceSnapshot: true,
+                        rawEntityId
+                    }
+                );
                 return;
             }
         }
@@ -4632,6 +4646,23 @@ export class LevelHandler {
                 ) || 0)
             );
             if (sharedEntityAuthorityToken > 0 && sharedEntityAuthorityToken !== client.token) {
+                const canonicalSharedDead = Boolean((levelEntity ?? ent)?.dead) ||
+                    Number((levelEntity ?? ent)?.entState ?? EntityState.ACTIVE) === EntityState.DEAD ||
+                    Math.round(Number((levelEntity ?? ent)?.hp ?? 1)) <= 0;
+                const { CombatHandler } = require('./CombatHandler') as typeof import('./CombatHandler');
+                CombatHandler.convergePartySharedHostileState(
+                    client,
+                    getClientLevelScope(client),
+                    levelEntity ?? ent,
+                    'non_authority_shared_hostile_state_rejected',
+                    {
+                        includeParty: canonicalSharedDead,
+                        sendHpCorrection: true,
+                        sendDeathState: true,
+                        forceSnapshot: true,
+                        rawEntityId
+                    }
+                );
                 return;
             }
         }
@@ -4668,7 +4699,14 @@ export class LevelHandler {
             isEnemyEntity &&
             isDefeatEntState &&
             MissionHandler.shouldIgnoreUnverifiedDungeonBossDefeat(currentLevel, levelEntity ?? ent);
-        const canonicalEntState = shouldIgnoreUnverifiedDungeonBossDeadState
+        const recentAuthoritativeDamageAt = Math.max(0, Math.round(Number(client.lastCombatActivityAt ?? 0)));
+        const shouldRejectLiveSelfDefeatState =
+            isSelf &&
+            isDefeatEntState &&
+            Math.round(Number(client.authoritativeCurrentHp ?? 0)) > 0 &&
+            recentAuthoritativeDamageAt > 0 &&
+            Date.now() - recentAuthoritativeDamageAt <= 2_000;
+        const canonicalEntState = shouldIgnoreUnverifiedDungeonBossDeadState || shouldRejectLiveSelfDefeatState
             ? EntityState.ACTIVE
             : entState;
         const canonicalIsDefeatState = LevelHandler.isDefeatedEntityStateValue(canonicalEntState);
@@ -4683,6 +4721,14 @@ export class LevelHandler {
         ent.v = Number(ent.v ?? 0) + deltaVX;
         ent.entState = canonicalEntState;
         ent.dead = canonicalIsDefeatState ? true : isActiveSelfState ? false : Boolean(ent.dead);
+        if (shouldRejectLiveSelfDefeatState) {
+            ent.hp = Math.max(1, Math.round(Number(client.authoritativeCurrentHp ?? ent.hp ?? 1)));
+            ent.maxHp = Math.max(
+                Math.round(Number(ent.maxHp ?? 0)),
+                Math.round(Number(client.authoritativeMaxHp ?? 0)),
+                Math.round(Number(ent.hp ?? 1))
+            );
+        }
         ent.facingLeft = flags.bLeft;
         ent.bRunning = flags.bRunning;
         ent.bJumping = flags.bJumping;
@@ -4697,6 +4743,10 @@ export class LevelHandler {
             levelEntity.v = ent.v;
             levelEntity.entState = canonicalEntState;
             levelEntity.dead = canonicalIsDefeatState ? true : isActiveSelfState ? false : Boolean(levelEntity.dead);
+            if (shouldRejectLiveSelfDefeatState) {
+                levelEntity.hp = ent.hp;
+                levelEntity.maxHp = ent.maxHp;
+            }
             levelEntity.facingLeft = flags.bLeft;
             levelEntity.bRunning = flags.bRunning;
             levelEntity.bJumping = flags.bJumping;
@@ -4705,7 +4755,29 @@ export class LevelHandler {
             levelEntity.velocityY = velocityY;
             levelEntity.airborne = isAirborne;
         }
-        
+
+        if (shouldRejectLiveSelfDefeatState) {
+            client.send(
+                0x07,
+                LevelHandler.buildEntityIncrementalUpdatePayload(
+                    client.clientEntID,
+                    0,
+                    0,
+                    0,
+                    EntityState.ACTIVE,
+                    {
+                        bLeft: flags.bLeft,
+                        bRunning: false,
+                        bJumping: false,
+                        bDropping: false,
+                        bBackpedal: false
+                    },
+                    false,
+                    0
+                )
+            );
+        }
+
         // Update Saved Coords if it's us and safe level
         if (isSelf && client.character) {
             const isDungeon = LevelConfig.get(currentLevel).isDungeon;
@@ -4795,7 +4867,7 @@ export class LevelHandler {
             }
         }
 
-        if (isSelf && isDefeatEntState) {
+        if (isSelf && canonicalIsDefeatState) {
             const { CombatHandler } = require('./CombatHandler') as typeof import('./CombatHandler');
             CombatHandler.notePlayerDeathState(client);
         }
@@ -4817,7 +4889,7 @@ export class LevelHandler {
         const relayDeltaVX = relayCanonicalDelta
             ? Math.round(Number((levelEntity ?? ent).v ?? 0) - previousCanonicalV)
             : deltaVX;
-        const relayData = rawEntityId === entityId
+        const relayData = rawEntityId === entityId && canonicalEntState === entState
             ? data
             : LevelHandler.buildEntityIncrementalUpdatePayload(
                 entityId,

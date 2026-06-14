@@ -1669,6 +1669,31 @@ async function testActiveSelfMovementClearsStaleDeadFlagForPlayerRegen(): Promis
     );
 }
 
+async function testLiveAuthoritativeHpRejectsPredictedSelfDeathState(): Promise<void> {
+    resetState();
+
+    const player = createFakeClient(64, 'PredictedSelfDeath', 57);
+    player.authoritativeMaxHp = 1000;
+    player.authoritativeCurrentHp = 800;
+    player.lastCombatActivityAt = Date.now();
+    attachPlayerEntity(player);
+    GlobalState.sessionsByToken.set(player.token, player as never);
+
+    await LevelHandler.handleEntityIncrementalUpdate(
+        player as never,
+        buildIncrementalStatePayload(player.clientEntID, EntityState.DEAD)
+    );
+
+    const playerEntity = player.entities.get(player.clientEntID)!;
+    assert.equal(player.authoritativeCurrentHp, 800, 'predicted self death must not overwrite live authoritative HP');
+    assert.equal(playerEntity.dead, false, 'live authoritative HP should reject local predicted dead state');
+    assert.equal(playerEntity.entState, EntityState.ACTIVE, 'live authoritative HP should keep the local player active');
+
+    const levelEntity = GlobalState.levelEntities.get(getClientLevelScope(player as never))!.get(player.clientEntID)!;
+    assert.equal(levelEntity.dead, false, 'live authoritative HP should keep the level player active');
+    assert.equal(levelEntity.entState, EntityState.ACTIVE, 'live authoritative HP should reject the level dead state');
+}
+
 function testStaleHundredHpSnapshotDoesNotShrinkPlayerRegen(): void {
     resetState();
 
@@ -3149,6 +3174,7 @@ async function run(): Promise<void> {
     testClientReportedHpLossStartsPlayerRegenAfterIdleDelay();
     testDeadPlayerDoesNotRegen();
     await testActiveSelfMovementClearsStaleDeadFlagForPlayerRegen();
+    await testLiveAuthoritativeHpRejectsPredictedSelfDeathState();
     testStaleHundredHpSnapshotDoesNotShrinkPlayerRegen();
     testDirtyCombatStatsBlockRegenUntilFreshSync();
     await testGearChangeDirtyStatsStillAllowPlayerRegen();

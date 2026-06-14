@@ -22,7 +22,7 @@
 [NpcDialogueLoader] Loaded NPC dialogue locales: en, tr.
 [DialogueTranslationLoader] Loaded dialogue translation locales: tr.
 [NpcLoader] Loaded NPCs for 24 levels.
-[Startup] dungeon-blitz-r v1.3.10
+[Startup] dungeon-blitz-r v1.3.17
 [Policy] Server listening on 0.0.0.0:843
 [StaticServer] Serving C:\Users\USER\Documents\GitHub\dungeon-blitz-typescript\src\client\content\localhost on http://0.0.0.0:80
 [StaticServer] Multiplayer mode: true
@@ -31,11 +31,11 @@
 [GameServer] Listening on 0.0.0.0:8080
 [StaticServer] -> GET /p/cbp/DungeonBlitz.swf from 10.179.241.65
 [StaticServer] Prepared DungeonBlitz.swf variant for multiplayer mode (en).
-[StaticServer] <- 200 GET /p/cbp/DungeonBlitz.swf to 10.179.241.65 90ms
+[StaticServer] <- 200 GET /p/cbp/DungeonBlitz.swf to 10.179.241.65 96ms
 [StaticServer] -> GET /p/cbz/masterFileList.xml from 10.179.241.65
-[StaticServer] <- 200 GET /masterFileList.xml to 10.179.241.65 3ms
+[StaticServer] <- 200 GET /masterFileList.xml to 10.179.241.65 2ms
 [StaticServer] -> GET /p/cbp/UI_0.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/UI_0.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cbp/UI_0.swf to 10.179.241.65 2ms
 [StaticServer] -> GET /p/cbp/DungeonBlitz.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/cbp/DungeonBlitz.swf to 10.179.241.65 1ms
 [StaticServer] -> GET /p/caa/Init.swz from 10.179.241.65
@@ -43,563 +43,331 @@
 [StaticServer] <- 200 GET /p/caa/Init.swz to 10.179.241.65 1ms
 [StaticServer] <- 200 GET /p/caf/Animation_Paladin.swf to 10.179.241.65 3ms
 [StaticServer] -> GET /p/cbp/Animation_Mage.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Animation_Mage.swf to 10.179.241.65 3ms
+[StaticServer] <- 200 GET /p/cbp/Animation_Mage.swf to 10.179.241.65 27ms
 [StaticServer] -> GET /p/cbp/Animation_Rogue.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/cbp/Animation_Rogue.swf to 10.179.241.65 2ms
 [StaticServer] -> GET /p/cbp/Login.swz from 10.179.241.65
 [StaticServer] -> GET /p/cbp/Gfx_Paladin_1.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/cbp/Login.swz to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cbp/Gfx_Paladin_1.swf to 10.179.241.65 6ms
+[StaticServer] <- 200 GET /p/cbp/Gfx_Paladin_1.swf to 10.179.241.65 16ms
 [StaticServer] -> GET /p/cbz/masterFileList.xml from 10.179.241.65
 [StaticServer] <- 200 GET /masterFileList.xml to 10.179.241.65 1ms
 [StaticServer] -> GET /p/cbp/UI_0.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/UI_0.swf to 10.179.241.65 2ms
-[StaticServer] -> GET /p/cbp/Gfx_Rogue_1.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Gfx_Rogue_1.swf to 10.179.241.65 4ms
-[StaticServer] -> GET /p/cbp/Gfx_Mage_1.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Gfx_Mage_1.swf to 10.179.241.65 18ms
-[StaticServer] -> GET /p/cam/Utilities.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Init.swz from 10.179.241.65
-[StaticServer] -> GET /p/caf/Animation_Paladin.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/UI_Library.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Init.swz to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cam/Utilities.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/caf/Animation_Paladin.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/caa/UI_Library.swf to 10.179.241.65 5ms
-[StaticServer] -> GET /p/cbp/Animation_Mage.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Animation_Mage.swf to 10.179.241.65 1ms
-[StaticServer] -> GET /p/cbp/Animation_Rogue.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Animation_Rogue.swf to 10.179.241.65 2ms
-[StaticServer] -> GET /p/caa/Library01.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Library01.swf to 10.179.241.65 1ms
-[StaticServer] -> GET /p/cbp/Login.swz from 10.179.241.65
-[StaticServer] -> GET /p/cbp/Gfx_Paladin_1.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Login.swz to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbp/Gfx_Paladin_1.swf to 10.179.241.65 14ms
-[StaticServer] -> GET /p/cbp/SFX_1.swf from 10.179.241.65
-[StaticServer] -> GET /p/cbp/SFX_2.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/SFX_2.swf to 10.179.241.65 17ms
-[StaticServer] <- 200 GET /p/cbp/SFX_1.swf to 10.179.241.65 18ms
+[StaticServer] <- 200 GET /p/cbp/UI_0.swf to 10.179.241.65 1ms
 [StaticServer] -> GET /p/cbp/Gfx_Rogue_1.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/cbp/Gfx_Rogue_1.swf to 10.179.241.65 2ms
 [StaticServer] -> GET /p/cbp/Gfx_Mage_1.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Gfx_Mage_1.swf to 10.179.241.65 4ms
-[GameServer] Client connected: 10.179.241.65:64918
+[StaticServer] <- 200 GET /p/cbp/Gfx_Mage_1.swf to 10.179.241.65 5ms
+[StaticServer] -> GET /p/caa/Init.swz from 10.179.241.65
+[StaticServer] -> GET /p/caf/Animation_Paladin.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Init.swz to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caf/Animation_Paladin.swf to 10.179.241.65 2ms
+[StaticServer] -> GET /p/cbp/Animation_Mage.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Utilities.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/Animation_Mage.swf to 10.179.241.65 3ms
+[StaticServer] -> GET /p/caa/UI_Library.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cam/Utilities.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/UI_Library.swf to 10.179.241.65 3ms
+[StaticServer] -> GET /p/cbp/Animation_Rogue.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/Animation_Rogue.swf to 10.179.241.65 2ms
+[StaticServer] -> GET /p/cbp/Login.swz from 10.179.241.65
+[StaticServer] -> GET /p/cbp/Gfx_Paladin_1.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/Login.swz to 10.179.241.65 1ms
+[StaticServer] -> GET /p/caa/Library01.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Library01.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbp/Gfx_Paladin_1.swf to 10.179.241.65 27ms
+[StaticServer] -> GET /p/cbp/Gfx_Rogue_1.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/Gfx_Rogue_1.swf to 10.179.241.65 2ms
+[StaticServer] -> GET /p/cbp/SFX_1.swf from 10.179.241.65
+[StaticServer] -> GET /p/cbp/SFX_2.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/SFX_2.swf to 10.179.241.65 20ms
+[StaticServer] <- 200 GET /p/cbp/SFX_1.swf to 10.179.241.65 31ms
+[StaticServer] -> GET /p/cbp/Gfx_Mage_1.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/Gfx_Mage_1.swf to 10.179.241.65 5ms
 [StaticServer] -> GET /p/cbp/SFX_3.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/UI_1.swf from 10.179.241.65
-[Login] Version: 100, Challenge: ad32bb44617bebde
-[StaticServer] <- 200 GET /p/cbp/SFX_3.swf to 10.179.241.65 8ms
-[StaticServer] <- 200 GET /p/cbp/UI_1.swf to 10.179.241.65 8ms
-[Login] Authenticate: tela@gmail.com
+[StaticServer] <- 200 GET /p/cbp/SFX_3.swf to 10.179.241.65 30ms
+[StaticServer] <- 200 GET /p/cbp/UI_1.swf to 10.179.241.65 31ms
 [StaticServer] -> GET /p/cbp/UI_2.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/UI_3.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/UI_4.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/caa/UI_3.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbp/UI_2.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cbp/UI_4.swf to 10.179.241.65 7ms
-[CharacterSelect] Selected Zeus
-[EnterWorld] Sent 0x21 to client for char Zeus, token=40194
+[StaticServer] <- 200 GET /p/cbp/UI_2.swf to 10.179.241.65 5ms
+[StaticServer] <- 200 GET /p/cbp/UI_4.swf to 10.179.241.65 10ms
 [StaticServer] -> GET /p/cbo/UI_Seasonal.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/sounds/Sound.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbo/UI_Seasonal.swf to 10.179.241.65 3ms
 [StaticServer] -> GET /p/cam/Utilities.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/UI_Library.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/cam/Utilities.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cbo/UI_Seasonal.swf to 10.179.241.65 3ms
 [StaticServer] <- 200 GET /p/caa/UI_Library.swf to 10.179.241.65 4ms
-[StaticServer] <- 200 GET /p/cbp/sounds/Sound.swf to 10.179.241.65 18ms
+[StaticServer] <- 200 GET /p/cbp/sounds/Sound.swf to 10.179.241.65 19ms
 [StaticServer] -> GET /p/cbw/Game.swz from 10.179.241.65
 [StaticServer] -> GET /p/cbp/GlobalMap01.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/GlobalMap02.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/GlobalMap02.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbw/Game.swz to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/GlobalMap02.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbw/Game.swz to 10.179.241.65 3ms
 [StaticServer] <- 200 GET /p/cbp/GlobalMap01.swf to 10.179.241.65 3ms
 [StaticServer] -> GET /p/caa/Library01.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/caa/Library01.swf to 10.179.241.65 1ms
 [StaticServer] -> GET /p/cbp/SFX_1.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/SFX_2.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbp/SFX_2.swf to 10.179.241.65 16ms
+[StaticServer] <- 200 GET /p/cbp/SFX_1.swf to 10.179.241.65 31ms
 [StaticServer] -> GET /p/caf/Animation_Abomination.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/caf/Animation_Abomination.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbp/SFX_2.swf to 10.179.241.65 18ms
-[StaticServer] <- 200 GET /p/cbp/SFX_1.swf to 10.179.241.65 19ms
 [StaticServer] -> GET /p/cam/Animation_AbominationSpider.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_AreaEffect.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Brute.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Cannonball.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Demonhead.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/caa/Animation_AreaEffect.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_Cannonball.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_Brute.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Demonhead.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cam/Animation_AbominationSpider.swf to 10.179.241.65 3ms
+[StaticServer] <- 200 GET /p/cam/Animation_AbominationSpider.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/Animation_Brute.swf to 10.179.241.65 1ms
+[StaticServer] -> GET /p/caa/Animation_Cannonball.swf from 10.179.241.65
 [StaticServer] -> GET /p/cam/Animation_Cyclops.swf from 10.179.241.65
-[StaticServer] -> GET /p/cbp/Animation_HorseMount.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Demonhead.swf from 10.179.241.65
 [StaticServer] -> GET /p/cam/Animation_Devourer.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_DireMount.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Cannonball.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Demonhead.swf to 10.179.241.65 2ms
 [StaticServer] <- 200 GET /p/cam/Animation_Devourer.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbp/Animation_HorseMount.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/caa/Animation_DireMount.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cam/Animation_Cyclops.swf to 10.179.241.65 4ms
-[GameServer] Client connected: 10.179.241.65:64952
+[StaticServer] <- 200 GET /p/cam/Animation_Cyclops.swf to 10.179.241.65 3ms
 [StaticServer] -> GET /p/cbp/SFX_3.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/UI_1.swf from 10.179.241.65
-[Login] Version: 100, Challenge: f521bcc426ff28fd
-[StaticServer] <- 200 GET /p/cbp/SFX_3.swf to 10.179.241.65 6ms
-[StaticServer] <- 200 GET /p/cbp/UI_1.swf to 10.179.241.65 7ms
+[StaticServer] -> GET /p/caa/Animation_DireMount.swf from 10.179.241.65
 [StaticServer] -> GET /p/cam/Animation_Dragon.swf from 10.179.241.65
 [StaticServer] -> GET /p/cam/Animation_Ghost.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Imp.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cam/Animation_Imp.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_DireMount.swf to 10.179.241.65 2ms
 [StaticServer] <- 200 GET /p/cam/Animation_Ghost.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cam/Animation_Dragon.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbp/UI_1.swf to 10.179.241.65 8ms
+[StaticServer] <- 200 GET /p/cbp/SFX_3.swf to 10.179.241.65 8ms
+[StaticServer] <- 200 GET /p/cam/Animation_Dragon.swf to 10.179.241.65 3ms
+[GameServer] Client connected: 10.179.241.65:53153
 [StaticServer] -> GET /p/cbp/Animation_Environmentals.swf from 10.179.241.65
 [StaticServer] -> GET /p/cam/Animation_Goblin.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Larva.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Larva.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cam/Animation_Goblin.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cbp/Animation_Environmentals.swf to 10.179.241.65 4ms
-[Login] Authenticate: tela@gmail.com
+[StaticServer] -> GET /p/cbp/Animation_HorseMount.swf from 10.179.241.65
+[Login] Version: 100, Challenge: 9158a1759c06319a
+[StaticServer] <- 200 GET /p/cam/Animation_Goblin.swf to 10.179.241.65 4ms
+[StaticServer] <- 200 GET /p/cbp/Animation_HorseMount.swf to 10.179.241.65 4ms
+[StaticServer] <- 200 GET /p/cbp/Animation_Environmentals.swf to 10.179.241.65 7ms
 [StaticServer] -> GET /p/cbp/UI_2.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/UI_3.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/UI_4.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/UI_3.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbp/UI_2.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/cbp/UI_4.swf to 10.179.241.65 8ms
+[StaticServer] <- 200 GET /p/caa/UI_3.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbp/UI_2.swf to 10.179.241.65 6ms
+[StaticServer] <- 200 GET /p/cbp/UI_4.swf to 10.179.241.65 10ms
+[Login] Authenticate: tela@gmail.com
+[StaticServer] -> GET /p/cam/Animation_Imp.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Larva.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Mimic.swf from 10.179.241.65
-[StaticServer] -> GET /p/caf/Animation_NPC.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Nephit.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Psychophage.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Larva.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cam/Animation_Imp.swf to 10.179.241.65 1ms
 [StaticServer] <- 200 GET /p/caa/Animation_Mimic.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_Nephit.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caf/Animation_NPC.swf to 10.179.241.65 3ms
+[StaticServer] <- 200 GET /p/caa/Animation_Psychophage.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Nephit.swf to 10.179.241.65 3ms
 [StaticServer] -> GET /p/cbo/UI_Seasonal.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/sounds/Sound.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cbo/UI_Seasonal.swf to 10.179.241.65 3ms
+[CharacterSelect] Selected Zeus
+[EnterWorld] Sent 0x21 to client for char Zeus, token=57357
+[StaticServer] -> GET /p/caf/Animation_NPC.swf from 10.179.241.65
 [StaticServer] -> GET /p/cbp/Animation_Pets.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Psychophage.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Puck.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Raptor.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_RockHulk.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Psychophage.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_Puck.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Raptor.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_RockHulk.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cbp/Animation_Pets.swf to 10.179.241.65 4ms
-[StaticServer] <- 200 GET /p/cbo/UI_Seasonal.swf to 10.179.241.65 8ms
-[StaticServer] <- 200 GET /p/cbp/sounds/Sound.swf to 10.179.241.65 25ms
-[StaticServer] -> GET /p/caa/Animation_SandWorm.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Scorpion.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Vigil.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_ShieldTank.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Tentacle.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_SandWorm.swf to 10.179.241.65 1ms
-[StaticServer] -> GET /p/caa/Animation_Warlock.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Vigil.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Scorpion.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cam/Animation_Tentacle.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_ShieldTank.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Warlock.swf to 10.179.241.65 2ms
-[StaticServer] -> GET /p/caa/Animation_Weapon1.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Weapon1.swf to 10.179.241.65 0ms
+[StaticServer] <- 200 GET /p/caa/Animation_Puck.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cbp/Animation_Pets.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbp/sounds/Sound.swf to 10.179.241.65 39ms
+[StaticServer] <- 200 GET /p/caf/Animation_NPC.swf to 10.179.241.65 6ms
 [StaticServer] -> GET /p/cbw/Game.swz from 10.179.241.65
 [StaticServer] -> GET /p/cbp/GlobalMap01.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/GlobalMap02.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/caa/GlobalMap02.swf to 10.179.241.65 1ms
 [StaticServer] <- 200 GET /p/cbw/Game.swz to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cbp/GlobalMap01.swf to 10.179.241.65 2ms
-[StaticServer] -> GET /p/cam/LevelsBT.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cam/LevelsBT.swf to 10.179.241.65 6ms
-[Client] Socket ended: 10.179.241.65:64918 bytesIn=108 bytesOut=259 authenticated=true
-[Client] Disconnected: 10.179.241.65:64918 hadError=false bytesIn=108 bytesOut=259 authenticated=true token=0 char=Zeus
-[GameServer] Client connected: 10.179.241.65:65020
-[GameLogin] Zeus entering BridgeTown with levelInstanceId='' (from entry: 'undefined')
-[GameLogin] Client logged in with token 40194 as Zeus
-[GameLogin] Sent 0x10 (Player Data)
-[EntityHandler] Sending initial entities for BridgeTown to Zeus
-[EntityHandler] Skipping server NPC init for client-spawn level BridgeTown
-[StaticServer] -> GET /p/caf/Animation_Abomination.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caf/Animation_Abomination.swf to 10.179.241.65 2ms
-[StaticServer] -> GET /p/cam/Animation_AbominationSpider.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_AreaEffect.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Brute.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_AreaEffect.swf to 10.179.241.65 0ms
-[StaticServer] <- 200 GET /p/cam/Animation_AbominationSpider.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Brute.swf to 10.179.241.65 2ms
-[StaticServer] -> GET /p/caa/Animation_Cannonball.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Cyclops.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Demonhead.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Devourer.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Cannonball.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cam/Animation_Devourer.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Demonhead.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/cam/Animation_Cyclops.swf to 10.179.241.65 3ms
-[StaticServer] -> GET /p/caa/Animation_DireMount.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Dragon.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Ghost.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cam/Animation_Ghost.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/caa/Animation_DireMount.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/cam/Animation_Dragon.swf to 10.179.241.65 3ms
-[StaticServer] -> GET /p/cbp/Animation_HorseMount.swf from 10.179.241.65
-[StaticServer] -> GET /p/cbp/Animation_Environmentals.swf from 10.179.241.65
-[StaticServer] -> GET /p/cam/Animation_Goblin.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/Animation_HorseMount.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/cam/Animation_Goblin.swf to 10.179.241.65 3ms
-[StaticServer] <- 200 GET /p/cbp/Animation_Environmentals.swf to 10.179.241.65 15ms
-[StaticServer] -> GET /p/cam/Animation_Imp.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Larva.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Mimic.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Nephit.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Psychophage.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Mimic.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_Larva.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/caa/Animation_Psychophage.swf to 10.179.241.65 1ms
-[StaticServer] <- 200 GET /p/cam/Animation_Imp.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_Nephit.swf to 10.179.241.65 3ms
-[StaticServer] -> GET /p/caf/Animation_NPC.swf from 10.179.241.65
-[StaticServer] -> GET /p/cbp/Animation_Pets.swf from 10.179.241.65
-[StaticServer] -> GET /p/caa/Animation_Puck.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/caa/Animation_Puck.swf to 10.179.241.65 0ms
-[StaticServer] <- 200 GET /p/cbp/Animation_Pets.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caf/Animation_NPC.swf to 10.179.241.65 3ms
+[StaticServer] <- 200 GET /p/cbp/GlobalMap01.swf to 10.179.241.65 3ms
 [StaticServer] -> GET /p/caa/Animation_Raptor.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_RockHulk.swf from 10.179.241.65
 [StaticServer] -> GET /p/cam/Animation_Tentacle.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_SandWorm.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Scorpion.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_ShieldTank.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cam/Animation_Tentacle.swf to 10.179.241.65 1ms
 [StaticServer] <- 200 GET /p/caa/Animation_Raptor.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_RockHulk.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/Animation_RockHulk.swf to 10.179.241.65 3ms
+[StaticServer] <- 200 GET /p/cam/Animation_Tentacle.swf to 10.179.241.65 2ms
 [StaticServer] <- 200 GET /p/caa/Animation_SandWorm.swf to 10.179.241.65 2ms
-[StaticServer] <- 200 GET /p/caa/Animation_ShieldTank.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/Animation_ShieldTank.swf to 10.179.241.65 1ms
 [StaticServer] <- 200 GET /p/caa/Animation_Scorpion.swf to 10.179.241.65 2ms
 [StaticServer] -> GET /p/caa/Animation_Vigil.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Warlock.swf from 10.179.241.65
 [StaticServer] -> GET /p/caa/Animation_Weapon1.swf from 10.179.241.65
 [StaticServer] <- 200 GET /p/caa/Animation_Vigil.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Weapon1.swf to 10.179.241.65 0ms
+[StaticServer] <- 200 GET /p/caa/Animation_Warlock.swf to 10.179.241.65 1ms
+[StaticServer] -> GET /p/cam/LevelsBT.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cam/LevelsBT.swf to 10.179.241.65 7ms
+[StaticServer] -> GET /p/caf/Animation_Abomination.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caf/Animation_Abomination.swf to 10.179.241.65 2ms
+[StaticServer] -> GET /p/cam/Animation_AbominationSpider.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_AreaEffect.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Brute.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_AreaEffect.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Brute.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cam/Animation_AbominationSpider.swf to 10.179.241.65 2ms
+[Client] Socket ended: 10.179.241.65:53153 bytesIn=108 bytesOut=259 authenticated=true
+[Client] Disconnected: 10.179.241.65:53153 hadError=false bytesIn=108 bytesOut=259 authenticated=true token=0 char=Zeus
+[GameServer] Client connected: 10.179.241.65:53187
+[GameLogin] Zeus entering BridgeTown with levelInstanceId='' (from entry: 'undefined')
+[GameLogin] Client logged in with token 57357 as Zeus
+[GameLogin] Sent 0x10 (Player Data)
+[EntityHandler] Sending initial entities for BridgeTown to Zeus
+[EntityHandler] Skipping server NPC init for client-spawn level BridgeTown
+[StaticServer] -> GET /p/caa/Animation_Cannonball.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Animation_Cyclops.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Demonhead.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Animation_Devourer.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Cannonball.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cam/Animation_Devourer.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Demonhead.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cam/Animation_Cyclops.swf to 10.179.241.65 3ms
+[StaticServer] -> GET /p/caa/Animation_DireMount.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Animation_Dragon.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Animation_Ghost.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_DireMount.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cam/Animation_Ghost.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cam/Animation_Dragon.swf to 10.179.241.65 3ms
+[StaticServer] -> GET /p/cbp/Animation_Environmentals.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Animation_Goblin.swf from 10.179.241.65
+[StaticServer] -> GET /p/cbp/Animation_HorseMount.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/cam/Animation_Goblin.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbp/Animation_HorseMount.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cbp/Animation_Environmentals.swf to 10.179.241.65 4ms
+[StaticServer] -> GET /p/cam/Animation_Imp.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Larva.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Mimic.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Nephit.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Psychophage.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Larva.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Mimic.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_Psychophage.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cam/Animation_Imp.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/Animation_Nephit.swf to 10.179.241.65 2ms
+[GameServer] Client connected: 10.179.241.65:53204
+[StaticServer] -> GET /p/caf/Animation_NPC.swf from 10.179.241.65
+[Login] Version: 100, Challenge: 87abde572c53480e
+[StaticServer] -> GET /p/caa/Animation_Puck.swf from 10.179.241.65
+[StaticServer] -> GET /p/cbp/Animation_Pets.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Puck.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/cbp/Animation_Pets.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caf/Animation_NPC.swf to 10.179.241.65 3ms
+[Login] Authenticate: tela@gmail.com
+[StaticServer] -> GET /p/caa/Animation_Raptor.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_RockHulk.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_SandWorm.swf from 10.179.241.65
+[StaticServer] -> GET /p/cam/Animation_Tentacle.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Scorpion.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_ShieldTank.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Raptor.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_RockHulk.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/Animation_SandWorm.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/cam/Animation_Tentacle.swf to 10.179.241.65 1ms
+[StaticServer] <- 200 GET /p/caa/Animation_ShieldTank.swf to 10.179.241.65 2ms
+[StaticServer] <- 200 GET /p/caa/Animation_Scorpion.swf to 10.179.241.65 2ms
+[StaticServer] -> GET /p/caa/Animation_Vigil.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Warlock.swf from 10.179.241.65
+[StaticServer] -> GET /p/caa/Animation_Weapon1.swf from 10.179.241.65
+[StaticServer] <- 200 GET /p/caa/Animation_Vigil.swf to 10.179.241.65 0ms
 [StaticServer] <- 200 GET /p/caa/Animation_Weapon1.swf to 10.179.241.65 1ms
 [StaticServer] <- 200 GET /p/caa/Animation_Warlock.swf to 10.179.241.65 1ms
 [CharacterSelect] Selected Telahair
-[EnterWorld] Sent 0x21 to client for char Telahair, token=37994
+[EnterWorld] Sent 0x21 to client for char Telahair, token=2955
 [StaticServer] -> GET /p/cbp/LevelsJC.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/LevelsJC.swf to 10.179.241.65 32ms
-[Client] Socket ended: 10.179.241.65:64952 bytesIn=126 bytesOut=345 authenticated=true
-[Client] Disconnected: 10.179.241.65:64952 hadError=false bytesIn=126 bytesOut=345 authenticated=true token=0 char=Telahair
-[GameServer] Client connected: 10.179.241.65:65055
+[StaticServer] <- 200 GET /p/cbp/LevelsJC.swf to 10.179.241.65 30ms
+[Client] Socket ended: 10.179.241.65:53204 bytesIn=126 bytesOut=345 authenticated=true
+[Client] Disconnected: 10.179.241.65:53204 hadError=false bytesIn=126 bytesOut=345 authenticated=true token=0 char=Telahair
+[GameServer] Client connected: 10.179.241.65:53220
 [GameLogin] Telahair entering JadeCityHard with levelInstanceId='' (from entry: 'undefined')
-[GameLogin] Client logged in with token 37994 as Telahair
+[GameLogin] Client logged in with token 2955 as Telahair
 [GameLogin] Sent 0x10 (Player Data)
 [EntityHandler] Sending initial entities for JadeCityHard to Telahair
 [EntityHandler] Skipping server NPC init for client-spawn level JadeCityHard
 [Level] Open Door 201 in JadeCityHard -> JC_Mini1Hard
-[Client] Socket ended: 10.179.241.65:65055 bytesIn=10148 bytesOut=3727 authenticated=false
-[Client] Disconnected: 10.179.241.65:65055 hadError=false bytesIn=10148 bytesOut=3727 authenticated=false token=37994 char=Telahair
-[GameServer] Client connected: 10.179.241.65:65066
-[Level] Transfer Request (0x1D): Token=37994, Level=JC_Mini1Hard
-[Level] Recovered transfer session from used token 37994 for user 10 (Char: Telahair)
-[Client] Socket ended: 10.179.241.65:65066 bytesIn=21 bytesOut=142 authenticated=false
-[Client] Disconnected: 10.179.241.65:65066 hadError=false bytesIn=21 bytesOut=142 authenticated=false token=0 char=Telahair
-[GameServer] Client connected: 10.179.241.65:65067
-[GameLogin] Telahair entering JC_Mini1Hard with levelInstanceId='54130' (from entry: '54130')
-[GameLogin] Client logged in with token 54130 as Telahair
+[Client] Socket ended: 10.179.241.65:53220 bytesIn=10138 bytesOut=3722 authenticated=false
+[Client] Disconnected: 10.179.241.65:53220 hadError=false bytesIn=10138 bytesOut=3722 authenticated=false token=2955 char=Telahair
+[GameServer] Client connected: 10.179.241.65:53229
+[Level] Transfer Request (0x1D): Token=2955, Level=JC_Mini1Hard
+[Level] Recovered transfer session from used token 2955 for user 10 (Char: Telahair)
+[Client] Socket ended: 10.179.241.65:53229 bytesIn=20 bytesOut=142 authenticated=false
+[Client] Disconnected: 10.179.241.65:53229 hadError=false bytesIn=20 bytesOut=142 authenticated=false token=0 char=Telahair
+[GameServer] Client connected: 10.179.241.65:53230
+[GameLogin] Telahair entering JC_Mini1Hard with levelInstanceId='58531' (from entry: '58531')
+[GameLogin] Client logged in with token 58531 as Telahair
 [GameLogin] Sent 0x10 (Player Data)
 [EntityHandler] Sending initial entities for JC_Mini1Hard to Telahair
 [EntityHandler] Initializing 7 NPCs for JC_Mini1Hard
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[Client] Socket ended: 10.179.241.65:65020 bytesIn=5253 bytesOut=1808 authenticated=false
-[Client] Disconnected: 10.179.241.65:65020 hadError=false bytesIn=5253 bytesOut=1808 authenticated=false token=40194 char=Zeus
-[GameServer] Client connected: 10.179.241.65:65069
-[Level] Transfer Request (0x1D): Token=40194, Level=JC_Mini1Hard
-[Level] Recovered transfer session from used token 40194 for user 10 (Char: Zeus)
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[Client] Socket ended: 10.179.241.65:53187 bytesIn=5253 bytesOut=1807 authenticated=false
+[Client] Disconnected: 10.179.241.65:53187 hadError=false bytesIn=5253 bytesOut=1807 authenticated=false token=57357 char=Zeus
+[GameServer] Client connected: 10.179.241.65:53233
+[Level] Transfer Request (0x1D): Token=57357, Level=JC_Mini1Hard
+[Level] Recovered transfer session from used token 57357 for user 10 (Char: Zeus)
 [StaticServer] -> GET /p/cbp/LevelsJC.swf from 10.179.241.65
-[StaticServer] <- 200 GET /p/cbp/LevelsJC.swf to 10.179.241.65 19ms
-[Client] Socket ended: 10.179.241.65:65069 bytesIn=21 bytesOut=144 authenticated=false
-[Client] Disconnected: 10.179.241.65:65069 hadError=false bytesIn=21 bytesOut=144 authenticated=false token=0 char=Zeus
-[GameServer] Client connected: 10.179.241.65:65071
-[GameLogin] Resolved login token 54130 -> pending token 20133 (sync-anchor:54130->20133)
-[GameLogin] Zeus entering JC_Mini1Hard with levelInstanceId='54130' (from entry: '54130')
-[GameLogin] Client logged in with token 20133 as Zeus
+[StaticServer] <- 200 GET /p/cbp/LevelsJC.swf to 10.179.241.65 11ms
+[Client] Socket ended: 10.179.241.65:53233 bytesIn=21 bytesOut=144 authenticated=false
+[Client] Disconnected: 10.179.241.65:53233 hadError=false bytesIn=21 bytesOut=144 authenticated=false token=0 char=Zeus
+[GameServer] Client connected: 10.179.241.65:53235
+[GameLogin] Resolved login token 58531 -> pending token 6602 (sync-anchor:58531->6602)
+[GameLogin] Zeus entering JC_Mini1Hard with levelInstanceId='58531' (from entry: '58531')
+[GameLogin] Client logged in with token 6602 as Zeus
 [GameLogin] Sent 0x10 (Player Data)
 [EntityHandler] Sending initial entities for JC_Mini1Hard to Zeus
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
 [GearGoldBonuses] Loaded 1465 gear gold find entries from C:\Users\USER\Documents\GitHub\dungeon-blitz-typescript\src\client\content\xml.
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-wait] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 currentHp=97 maxHp=68109 lastCombatAt=1781466508695 lastTickAt=0 dueAt=1781466513695 nowMs=1781466508811
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=20133 playerEnt=20133 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=20133 playerEnt=20133 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=20133 playerEnt=20133 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=20133 playerEnt=20133 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=20133 playerEnt=20133 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=20133 playerEnt=20133 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=54130 playerEnt=54130 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
-[CombatRegen][regen-skip] player=Zeus token=20133 ent=20133 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][regen-skip] player=Telahair token=54130 ent=54130 level=JC_Mini1Hard#54130 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
-[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#54130 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-wait] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 currentHp=80 maxHp=68109 lastCombatAt=1781476633810 lastTickAt=0 dueAt=1781476638810 nowMs=1781476633811
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-skip] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][regen-wait] player=Zeus token=6602 ent=6602 level=JC_Mini1Hard#58531 currentHp=97 maxHp=68109 lastCombatAt=1781476633811 lastTickAt=0 dueAt=1781476638811 nowMs=1781476633935
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=6602 playerEnt=6602 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-skip] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][regen-skip] player=Zeus token=6602 ent=6602 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=6602 playerEnt=6602 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=6602 playerEnt=6602 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-skip] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][regen-skip] player=Zeus token=6602 ent=6602 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=6602 playerEnt=6602 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-skip] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][regen-skip] player=Zeus token=6602 ent=6602 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Zeus playerToken=6602 playerEnt=6602 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=false currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-skip] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][regen-skip] player=Zeus token=6602 ent=6602 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[Client] Socket ended: 10.179.241.65:53235 bytesIn=4681 bytesOut=3382 authenticated=false
+[Client] Disconnected: 10.179.241.65:53235 hadError=false bytesIn=4681 bytesOut=3382 authenticated=false token=6602 char=Zeus
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][regen-skip] player=Telahair token=58531 ent=58531 level=JC_Mini1Hard#58531 reason=dead entityHp=0 levelHp=0 authHp=0 authMax=68109
+[CombatRegen][boss-regen-skip] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 reason=full currentHp=538240 maxHp=538240 entityHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[CombatRegen][boss-regen-arm] level=JC_Mini1Hard#58531 boss=TowerGuard1Hard display=Lotte,_The_1st_Daughter ent=910005 player=Telahair playerToken=58531 playerEnt=58531 alreadyArmed=true currentHp=538240 maxHp=538240 healthDelta=0 roomId=3
+[Client] Socket ended: 10.179.241.65:53230 bytesIn=5817 bytesOut=2620 authenticated=false
+[Client] Disconnected: 10.179.241.65:53230 hadError=false bytesIn=5817 bytesOut=2620 authenticated=false token=58531 char=Telahair

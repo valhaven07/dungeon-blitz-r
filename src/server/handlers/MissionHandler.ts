@@ -1364,12 +1364,19 @@ export class MissionHandler {
             clearedDungeon = true;
         }
         noteDungeonRunCompletionProgress(client, effectiveCompletionPercent);
+        const serverObservedSharedFullClearCompletion = Boolean(
+            usesSharedDungeonProgress(currentLevel) &&
+            levelScope &&
+            effectiveCompletionPercent >= 100 &&
+            MissionHandler.canHonorForcedDungeonCompletion(client, currentLevel, levelScope, true)
+        );
 
         if (
             clearedDungeon &&
             dungeonRequiresSpecificCompletionObjectives &&
             !forceSharedDungeonCompletionAllowed &&
-            !dungeonCompletionObjectivesMet
+            !dungeonCompletionObjectivesMet &&
+            !serverObservedSharedFullClearCompletion
         ) {
             return;
         }
@@ -1377,6 +1384,7 @@ export class MissionHandler {
         if (
             !forceSharedDungeonCompletionAllowed &&
             !serverValidatedDungeonCompletion &&
+            !serverObservedSharedFullClearCompletion &&
             !MissionHandler.canAcceptClientReportedDungeonCompletion(
                 client,
                 currentLevel,
@@ -3102,7 +3110,15 @@ export class MissionHandler {
             return true;
         }
 
-        return MissionHandler.hasMetRequiredDungeonCompletionObjectives(client, currentLevel, levelScope);
+        if (MissionHandler.hasMetRequiredDungeonCompletionObjectives(client, currentLevel, levelScope)) {
+            return true;
+        }
+
+        if (MissionHandler.requiresBossAndChestCompletionForDungeon(currentLevel)) {
+            return false;
+        }
+
+        return Boolean(levelScope && !MissionHandler.hasRemainingDungeonHostiles(levelScope));
     }
 
     static getSharedDungeonAutoCompleteScheduleOptions(
@@ -3114,16 +3130,7 @@ export class MissionHandler {
         settleDelayMs?: number;
         waitForCutsceneEnd?: boolean;
     } {
-        const currentLevel =
-            LevelConfig.normalizeLevelName(client.currentLevel || String(client.character?.CurrentLevel?.name ?? '')) ||
-            client.currentLevel ||
-            String(client.character?.CurrentLevel?.name ?? '');
-        const waitForCutsceneEnd =
-            String(client.activeDungeonCutsceneScope ?? '').trim() === levelScope ||
-            (
-                MissionHandler.hasPostDeathBossCutscene(currentLevel) &&
-                MissionHandler.hasMetRequiredDungeonCompletionObjectives(client, currentLevel, levelScope)
-            );
+        const waitForCutsceneEnd = String(client.activeDungeonCutsceneScope ?? '').trim() === levelScope;
 
         return {
             forcedDungeonCompletionScope: levelScope,

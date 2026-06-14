@@ -289,6 +289,24 @@ async function testHostilePlayerDeathBroadcastsServerHpToTeammate(): Promise<voi
         buildPowerHitPayload(victim.clientEntID, hostileId, 80, 42)
     );
 
+    assert.equal(victim.authoritativeCurrentHp, 15, 'first overkill hostile damage should be capped instead of killing immediately');
+    assert.equal(victim.entities.get(victim.clientEntID)?.hp, 15, 'victim local entity HP should stay alive after the first capped hit');
+    assert.equal(levelVictim?.hp, 15, 'canonical level player entity HP should stay alive after the first capped hit');
+    assert.equal(levelVictim?.dead, false, 'canonical level player entity should not be marked dead after one capped hit');
+
+    const prematureDeathState = watcher.sentPackets
+        .filter((packet) => packet.id === 0x07)
+        .map((packet) => parseEntityState(packet.payload))
+        .find((packet) => packet.entityId === victim.clientEntID);
+    assert.equal(prematureDeathState, undefined, 'teammate should not receive a death state after one capped hostile hit');
+
+    watcher.sentPackets.length = 0;
+
+    await CombatHandler.handlePowerHit(
+        watcher as never,
+        buildPowerHitPayload(victim.clientEntID, hostileId, 80, 42)
+    );
+
     assert.equal(victim.authoritativeCurrentHp, 0, 'server authoritative player HP should hit zero after lethal hostile damage');
     assert.equal(victim.entities.get(victim.clientEntID)?.hp, 0, 'victim local entity HP should be synchronized to zero');
     assert.equal(levelVictim?.hp, 0, 'canonical level player entity HP should be synchronized to zero');
